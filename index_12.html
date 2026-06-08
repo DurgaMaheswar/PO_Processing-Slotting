@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Boldfit — PO Command Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F0F4F8; --surface:#FFFFFF; --border:#E2E8F0; --border2:#CBD5E1;
+  --text:#0F172A; --text2:#475569; --text3:#94A3B8;
+  --yellow:#FFC400; --yellow-d:#E0A800; --ink:#1A1A1A; --blue:#2874F0;
+  --sans:'Hanken Grotesk',sans-serif; --display:'Bricolage Grotesque',sans-serif; --mono:'JetBrains Mono',monospace;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow-lg:0 18px 44px rgba(15,23,42,.12),0 4px 12px rgba(15,23,42,.06);
+  --bar:64px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--sans);color:var(--text);background:var(--bg);height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:14px}
+
+/* ── top bar ── */
+.topbar{height:var(--bar);flex-shrink:0;display:flex;align-items:center;gap:18px;padding:0 20px;
+  background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);position:relative;z-index:10}
+.topbar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--yellow),#FFE07A,var(--yellow))}
+.brand{display:flex;align-items:center;gap:11px}
+.logo-mini{width:42px;height:42px;border-radius:11px;background:#fff;padding:3px;border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm)}
+.logo-mini img{width:36px;height:36px;object-fit:contain;border-radius:8px}
+.brand .wm{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:-.02em;color:var(--ink);line-height:1}
+.brand .wm small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);font-weight:500;margin-top:2px}
+.tabs{display:flex;gap:4px;margin-left:8px}
+.tab{font-family:var(--sans);font-weight:600;font-size:14px;color:var(--text2);background:transparent;border:none;
+  padding:9px 16px;border-radius:10px;cursor:pointer;transition:.16s;position:relative}
+.tab:hover{background:var(--bg);color:var(--text)}
+.tab.active{color:var(--ink);background:#FFF6D6}
+.tab.active::after{content:"";position:absolute;left:14px;right:14px;bottom:-1px;height:3px;border-radius:3px;background:var(--yellow-d)}
+.spacer{flex:1}
+.newtab{display:none;align-items:center;gap:7px;font-family:var(--sans);font-weight:700;font-size:12.5px;color:var(--ink);
+  background:var(--yellow);border:none;padding:9px 14px;border-radius:10px;cursor:pointer;box-shadow:0 4px 12px rgba(255,196,0,.4);transition:.16s}
+.newtab:hover{background:var(--yellow-d);color:#000}
+
+/* ── views ── */
+main{flex:1;position:relative;overflow:hidden}
+.view{position:absolute;inset:0;display:none}
+.view.active{display:block}
+.tool{width:100%;height:100%;border:0;display:block;background:#fff}
+
+/* ── home ── */
+#home{overflow:auto;background:
+  radial-gradient(680px 300px at 85% -8%,rgba(255,196,0,.18),transparent 60%),
+  radial-gradient(560px 280px at 8% 0%,rgba(40,116,240,.06),transparent 55%)}
+.home-inner{max-width:1040px;margin:0 auto;padding:54px 24px 40px}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:40px}
+.logo-tile{width:84px;height:84px;border-radius:20px;background:#fff;padding:6px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
+.logo-tile img{width:70px;height:70px;object-fit:contain;border-radius:14px}
+.eyebrow{margin-top:20px;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--yellow-d);font-weight:500}
+h1{font-family:var(--display);font-weight:800;font-size:46px;letter-spacing:-.04em;margin-top:12px;color:var(--ink);line-height:1.02}
+h1 .y{color:var(--yellow-d)}
+.sub{color:var(--text2);font-size:15px;max-width:540px;margin-top:11px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+.card{position:relative;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);
+  border-radius:18px;padding:28px 26px 24px;cursor:pointer;box-shadow:var(--shadow-sm);transition:transform .2s,box-shadow .2s,border-color .2s;overflow:hidden;text-align:left}
+.card::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:var(--yellow);transform:scaleX(0);transform-origin:left;transition:transform .25s}
+.card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:var(--yellow)}
+.card:hover::before{transform:scaleX(1)}
+.card-top{display:flex;align-items:center;gap:14px;margin-bottom:15px}
+.ic{width:54px;height:54px;border-radius:15px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--ink),#333);box-shadow:0 6px 16px rgba(0,0,0,.22)}
+.ic svg{width:27px;height:27px}
+.ctag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);font-weight:500}
+.card h2{font-family:var(--display);font-weight:800;font-size:23px;letter-spacing:-.025em;color:var(--ink);line-height:1.1}
+.desc{color:var(--text2);font-size:14px;margin:4px 0 26px}
+.feat{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.feat li{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--text2)}
+.feat li svg{width:16px;height:16px;flex-shrink:0;margin-top:2px;color:var(--yellow-d)}
+.go{margin-top:auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--yellow);color:var(--ink);font-weight:700;font-size:14px;padding:12px 18px;border-radius:11px;transition:gap .2s,background .2s;box-shadow:0 4px 14px rgba(255,196,0,.4)}
+.card:hover .go{background:var(--yellow-d);gap:12px;color:#000}
+@media(max-width:760px){.grid{grid-template-columns:1fr}h1{font-size:30px}.brand .wm{font-size:15px}.tab{padding:8px 11px;font-size:13px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo-mini"><img src="data:image/avif;base64,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" alt="Boldfit" style="width:48px;height:48px;object-fit:contain;border-radius:10px;" /></div>
+    <div class="wm">PO Command Centre<small>Boldfit Supply Ops</small></div>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-view="home">Home</button>
+    <button class="tab" data-view="proc">PO Processing</button>
+    <button class="tab" data-view="slot">PO Slotting</button>
+  </nav>
+  <span class="spacer"></span>
+  <button class="newtab" id="newtab">↗ Open in new tab</button>
+</header>
+
+<main>
+  <section id="home" class="view active">
+    <div class="home-inner">
+      <div class="hero">
+        <div class="logo-tile"><img src="data:image/avif;base64,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" alt="Boldfit" style="width:48px;height:48px;object-fit:contain;border-radius:10px;" /></div>
+        <div class="eyebrow">Boldfit · Supply Operations</div>
+        <h1>PO <span class="y">Command Centre</span></h1>
+      </div>
+      <div class="grid">
+        <button class="card" data-go="proc">
+          <div class="card-top">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6a1 1 0 0 1 1 1v1h2a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h2V4a1 1 0 0 1 1-1Z"/><path d="M9 5h6"/><path d="m9 13 2 2 4-4"/></svg></div>
+            <div><div class="ctag">Acknowledge · Combine</div><h2>PO Processing</h2></div>
+          </div>
+          <p class="desc">Bulk-acknowledge Flipkart POs and assemble clean, combined data for downstream work.</p>
+          <span class="go">Open workspace →</span>
+        </button>
+        <button class="card" data-go="slot">
+          <div class="card-top">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3z"/><path d="M14 10h3l3 3v2h-6z"/><circle cx="7" cy="17" r="1.8"/><circle cx="17" cy="17" r="1.8"/></svg></div>
+            <div><div class="ctag">Appointments · Mode</div><h2>PO Slotting</h2></div>
+          </div>
+          <p class="desc">Propose slotting dates and decide FTL, Courier, clubbing or cannot-supply per lane.</p>
+          <span class="go">Open workspace →</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div id="procWrap" class="view"><iframe id="ifProc" class="tool" title="PO Processing" srcdoc="<!DOCTYPE html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
+<title>Boldfit — PO Command Centre</title>
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;>
+<link href=&quot;https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
+<script src=&quot;https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js&quot;></script>
+<script src=&quot;https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.0/lib/msal-browser.min.js&quot; onerror=&quot;this.onerror=null;this.src='https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js'&quot;></script>
+<style>
+/* ── TOKENS ───────────────────────────────────── */
+:root {
+  --bg:        #F0F4F8;
+  --surface:   #FFFFFF;
+  --surface2:  #F8FAFC;
+  --surface3:  #EEF2F7;
+  --border:    #E2E8F0;
+  --border2:   #CBD5E1;
+  --blue:      #2874F0;
+  --blue-light:#EBF2FF;
+  --blue-mid:  #DBEAFE;
+  --blue-dark: #1A5CC7;
+  --orange:    #F97316;
+  --green:     #059669;
+  --green-light:#ECFDF5;
+  --yellow:    #D97706;
+  --red:       #DC2626;
+  --text:      #0F172A;
+  --text2:     #475569;
+  --text3:     #94A3B8;
+  --mono:      'JetBrains Mono', monospace;
+  --sans:      'Plus Jakarta Sans', sans-serif;
+  --display:   'Space Grotesk', sans-serif;
+  --radius:    10px;
+  --radius-lg: 16px;
+  --sidebar:   256px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow:    0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* ── RESET ────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{
+  font-family:var(--sans);background:var(--bg);color:var(--text);
+  min-height:100%;display:flex;flex-direction:column;font-size:14px;line-height:1.6;
+}
+
+/* ── LAYOUT ───────────────────────────────────── */
+.shell{display:flex;height:100vh;overflow:hidden;}
+
+/* ── SIDEBAR ──────────────────────────────────── */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:0 0 20px;
+  box-shadow:var(--shadow-sm);
+}
+
+/* Brand */
+.brand{
+  padding:24px 20px 20px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:16px;
+}
+.brand-logo{display:flex;align-items:center;gap:11px;margin-bottom:3px;}
+.brand-icon-wrap{
+  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,#1A1A1A 0%,#333333 100%);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(0,0,0,0.25);
+  position:relative;overflow:hidden;
+}
+.brand-icon-wrap::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.1) 0%,transparent 60%);
+}
+.brand-icon-svg{width:22px;height:22px;flex-shrink:0;position:relative;z-index:1;}
+.brand-name{
+  font-family:var(--display);font-size:22px;font-weight:700;
+  letter-spacing:-0.03em;color:#1A1A1A;line-height:1;
+}
+.brand-name span{color:#FF6B00;}
+.brand-tagline{
+  font-size:10.5px;color:var(--text3);letter-spacing:0.04em;
+  text-transform:uppercase;font-weight:500;padding-left:51px;
+}
+
+/* Nav */
+.nav-label{
+  font-size:10px;font-weight:700;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--text3);
+  padding:0 20px;margin-bottom:6px;
+}
+.nav-steps{display:flex;flex-direction:column;gap:2px;padding:0 10px;flex:1;}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;border-radius:10px;cursor:pointer;
+  transition:all 0.18s;position:relative;border:1px solid transparent;
+}
+.nav-item:hover{background:var(--surface2);}
+.nav-item.active{background:var(--blue-light);border-color:rgba(40,116,240,0.2);}
+.nav-item.done{opacity:0.65;}
+.nav-item.done:hover{opacity:1;background:var(--green-light);}
+.nav-num{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:12px;font-weight:500;
+  background:var(--surface3);border:1px solid var(--border2);
+  color:var(--text2);transition:all 0.18s;
+}
+.nav-item.active .nav-num{
+  background:var(--blue);border-color:var(--blue);color:#fff;
+  box-shadow:0 2px 8px rgba(40,116,240,0.4);
+}
+.nav-item.done .nav-num{background:#ECFDF5;border-color:#6EE7B7;color:var(--green);font-size:14px;}
+.nav-info{flex:1;min-width:0;}
+.nav-title{font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color 0.15s;}
+.nav-item.active .nav-title{color:var(--blue);}
+.nav-item.done .nav-title{color:var(--green);}
+.nav-status{font-size:11px;color:var(--text3);margin-top:1px;}
+.nav-item.active .nav-status{color:rgba(40,116,240,0.7);}
+.nav-arrow{font-size:11px;color:var(--text3);opacity:0;transition:opacity 0.15s;}
+.nav-item.active .nav-arrow{opacity:1;color:var(--blue);}
+
+.sidebar-footer{
+  padding:14px 20px 0;border-top:1px solid var(--border);margin:0 0 0;
+  margin-top:auto;
+}
+.version-tag{font-family:var(--mono);font-size:10px;color:var(--text3);}
+
+/* ── MAIN ─────────────────────────────────────── */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;background:var(--bg);}
+
+.topbar{
+  padding:20px 28px 0;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:10;background:var(--bg);
+  border-bottom:1px solid var(--border);padding-bottom:18px;
+  background:rgba(240,244,248,0.92);backdrop-filter:blur(12px);
+}
+.page-title{font-family:var(--display);font-size:20px;font-weight:700;color:var(--text);letter-spacing:-0.02em;}
+.page-subtitle{font-size:12px;color:var(--text3);margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.progress-pill{
+  display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:99px;
+  background:var(--surface);border:1px solid var(--border);
+  font-size:12px;color:var(--text2);font-family:var(--mono);
+  box-shadow:var(--shadow-sm);
+}
+.progress-dots{display:flex;gap:5px;}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--border2);transition:all 0.2s;}
+.pdot.done{background:var(--green);}
+.pdot.active{background:var(--blue);box-shadow:0 0 0 3px rgba(40,116,240,0.2);}
+
+.content{padding:24px 28px 48px;flex:1;}
+
+/* ── PANELS ───────────────────────────────────── */
+.panel{display:none;animation:panelIn 0.3s ease;}
+.panel.active{display:block;}
+@keyframes panelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ── CARD ─────────────────────────────────────── */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:24px;margin-bottom:16px;
+  box-shadow:var(--shadow-sm);
+}
+.card-accent{border-left:3px solid var(--blue);}
+.card-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;}
+.card-icon{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:21px;
+  background:var(--blue-light);border:1px solid rgba(40,116,240,0.15);
+}
+.card-icon.orange{background:#FFF7ED;border-color:rgba(249,115,22,0.2);}
+.card-icon.green{background:var(--green-light);border-color:rgba(5,150,105,0.2);}
+.card-icon.purple{background:#F5F3FF;border-color:rgba(124,58,237,0.2);}
+.card-title{font-family:var(--display);font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-0.02em;}
+.card-desc{font-size:13px;color:var(--text2);line-height:1.7;max-width:600px;}
+
+/* ── INSTRUCTIONS ─────────────────────────────── */
+.instructions{
+  background:var(--blue-light);border:1px solid rgba(40,116,240,0.15);
+  border-left:3px solid var(--blue);border-radius:0 10px 10px 0;
+  padding:13px 16px;margin-bottom:18px;
+}
+.instructions ol{padding-left:18px;}
+.instructions ol li{font-size:13px;color:var(--text2);line-height:2.1;}
+.instructions a{color:var(--blue);text-decoration:none;font-weight:500;}
+.instructions a:hover{text-decoration:underline;}
+.instructions code{
+  font-family:var(--mono);font-size:11px;
+  background:rgba(40,116,240,0.1);color:var(--blue-dark);
+  padding:1px 6px;border-radius:4px;font-weight:500;
+}
+.instructions strong{color:var(--text);font-weight:600;}
+
+/* ── FORM ─────────────────────────────────────── */
+.field-label{
+  font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:7px;display:block;
+}
+.field-label span{font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;}
+textarea,input[type=text]{
+  width:100%;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:10px;padding:11px 14px;font-family:var(--mono);
+  font-size:12.5px;color:var(--text);resize:vertical;outline:none;
+  transition:border-color 0.18s,box-shadow 0.18s;line-height:1.7;
+}
+textarea:focus,input[type=text]:focus{
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(40,116,240,0.1);
+  background:#fff;
+}
+textarea::placeholder,input::placeholder{color:var(--text3);}
+
+/* ── BUTTONS ──────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:10px 20px;
+  border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;
+  border:none;transition:all 0.16s;font-family:var(--sans);white-space:nowrap;
+}
+.btn-primary{
+  background:var(--blue);color:#fff;
+  box-shadow:0 2px 8px rgba(40,116,240,0.3);
+}
+.btn-primary:hover{background:var(--blue-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(40,116,240,0.35);}
+.btn-primary:active{transform:none;}
+.btn-ghost{background:var(--surface);color:var(--text2);border:1.5px solid var(--border);}
+.btn-ghost:hover{background:var(--surface2);color:var(--text);border-color:var(--border2);}
+.btn-success{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(5,150,105,0.25);}
+.btn-success:hover{background:#047857;transform:translateY(-1px);}
+.btn-sm{padding:7px 14px;font-size:12px;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+.btn-group{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center;}
+.btn-count{font-size:12px;color:var(--text3);font-family:var(--mono);}
+.copy-ok{font-size:11px;color:var(--green);font-weight:600;display:none;font-family:var(--mono);}
+
+/* ── CODE OUTPUT ──────────────────────────────── */
+.code-block{
+  background:#0F172A;border:1px solid #1E293B;border-radius:12px;
+  overflow:hidden;margin-top:16px;display:none;
+  box-shadow:var(--shadow);
+}
+.code-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 16px;background:#1E293B;border-bottom:1px solid #334155;
+}
+.code-filename{font-family:var(--mono);font-size:11px;color:#60A5FA;display:flex;align-items:center;gap:8px;}
+.code-filename::before{content:'';width:8px;height:8px;border-radius:50%;background:#60A5FA;display:inline-block;}
+.code-body{
+  padding:16px;font-family:var(--mono);font-size:12px;
+  color:#94A3B8;white-space:pre;overflow-x:auto;max-height:240px;line-height:1.75;
+}
+.code-body .kw{color:#7DD3FC;}
+.code-body .po{color:#FCD34D;}
+.code-body .fn{color:#C084FC;}
+.code-body .cm{color:#475569;}
+
+/* ── DROP ZONE ────────────────────────────────── */
+.drop-zone{
+  border:2px dashed var(--border2);border-radius:14px;
+  padding:32px 24px;text-align:center;cursor:pointer;
+  transition:all 0.18s;background:var(--surface2);margin-bottom:14px;
+}
+.drop-zone:hover,.drop-zone.over{
+  border-color:var(--blue);background:var(--blue-light);
+}
+.drop-zone .dz-icon{font-size:34px;margin-bottom:10px;display:block;}
+.drop-zone p{font-size:13px;color:var(--text2);line-height:1.8;}
+.drop-zone strong{color:var(--text);font-weight:600;}
+.drop-zone code{font-family:var(--mono);font-size:11px;color:var(--blue);background:var(--blue-light);padding:1px 5px;border-radius:3px;}
+#fileInput,#csvInput{display:none;}
+
+/* ── FILE LIST ────────────────────────────────── */
+.file-list{display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;margin-bottom:14px;}
+.file-chip{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:12px;}
+.file-chip .fc-name{flex:1;font-family:var(--mono);color:var(--text2);}
+.file-chip .fc-status{font-size:11px;font-weight:600;}
+.file-chip.ok .fc-status{color:var(--green);}
+.file-chip.err .fc-status{color:var(--red);}
+.file-chip.pending .fc-status{color:var(--text3);}
+
+/* ── PROGRESS ─────────────────────────────────── */
+.prog-wrap{background:var(--surface3);border-radius:4px;height:4px;overflow:hidden;margin:12px 0 6px;display:none;}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--blue),#60A5FA);border-radius:4px;transition:width 0.3s ease;width:0%;}
+.prog-label{font-size:11px;color:var(--text3);display:none;font-family:var(--mono);}
+
+/* ── RESULT BAND ──────────────────────────────── */
+.result-band{display:none;padding:11px 16px;border-radius:10px;margin:12px 0;font-size:13px;font-weight:600;align-items:center;gap:8px;}
+.result-band.ok{background:var(--green-light);border:1px solid #A7F3D0;color:var(--green);display:flex;}
+.result-band.warn{background:#FFFBEB;border:1px solid #FDE68A;color:var(--yellow);display:flex;}
+.result-band.err-band{background:#FEF2F2;border:1px solid #FECACA;color:var(--red);display:flex;}
+.result-band span{font-weight:400;color:var(--text2);}
+
+/* ── TABLE ────────────────────────────────────── */
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:12px;margin-top:14px;display:none;max-height:280px;box-shadow:var(--shadow-sm);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead{position:sticky;top:0;z-index:1;}
+th{background:#0F172A;color:#94A3B8;font-weight:600;padding:10px 14px;text-align:left;white-space:nowrap;border-right:1px solid #1E293B;font-size:10px;letter-spacing:0.07em;text-transform:uppercase;font-family:var(--mono);}
+td{padding:8px 14px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);color:var(--text2);white-space:nowrap;font-family:var(--mono);font-size:11.5px;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--blue-light);color:var(--text);}
+
+/* ── STAT ROW ─────────────────────────────────── */
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+.stat-chip{padding:14px 18px;border-radius:12px;border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow-sm);}
+.stat-chip.ok-chip{background:var(--green-light);border-color:#A7F3D0;}
+.stat-chip.warn-chip{background:#FFFBEB;border-color:#FDE68A;}
+.stat-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px;}
+.stat-chip.ok-chip .stat-label{color:#059669;opacity:0.8;}
+.stat-chip.warn-chip .stat-label{color:var(--yellow);}
+.stat-value{font-family:var(--display);font-size:28px;font-weight:700;color:var(--text);}
+.stat-chip.ok-chip .stat-value{color:var(--green);}
+.stat-chip.warn-chip .stat-value{color:var(--yellow);}
+.unmatched-box{padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--text2);font-family:var(--mono);line-height:1.9;display:none;margin-top:10px;}
+
+/* ── DIVIDER ──────────────────────────────────── */
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
+
+/* ── FOOTER ───────────────────────────────────── */
+.panel-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);}
+.panel-footer-note{font-size:12px;color:var(--text3);}
+
+/* ── BADGE ────────────────────────────────────── */
+.badge-new{font-size:9px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:var(--blue);color:#fff;padding:2px 8px;border-radius:99px;vertical-align:middle;margin-left:8px;}
+
+/* ── EXCEL SECTION ────────────────────────────── */
+.xl-card{background:linear-gradient(135deg,#F0FDF4 0%,#ECFDF5 100%);border:1.5px solid #A7F3D0;border-radius:var(--radius-lg);padding:22px;margin-top:16px;display:none;box-shadow:var(--shadow-sm);}
+.xl-title{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:15px;font-weight:700;color:var(--green);margin-bottom:6px;}
+.xl-desc{font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.7;}
+.xl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.xl-field label{font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px;}
+.xl-field input{background:#fff;border-color:#A7F3D0;font-size:12px;padding:9px 12px;}
+.xl-field input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(5,150,105,0.08);}
+.xl-radio-row{display:flex;gap:20px;align-items:center;margin-bottom:14px;}
+.xl-radio-row label{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;cursor:pointer;}
+.xl-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.btn-ms{background:#fff;color:var(--text);border:1.5px solid var(--border2);padding:9px 16px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all 0.15s;font-family:var(--sans);}
+.btn-ms:hover{background:var(--surface2);border-color:var(--border2);}
+.btn-ms:disabled{opacity:0.3;cursor:not-allowed;}
+.signed-badge{font-size:11px;padding:5px 12px;border-radius:6px;background:var(--green-light);color:var(--green);font-weight:600;border:1px solid #A7F3D0;display:none;align-items:center;gap:6px;font-family:var(--mono);}
+.signed-badge.show{display:inline-flex;}
+.xl-status{font-size:12px;font-weight:500;padding:8px 14px;border-radius:8px;display:none;margin-top:10px;font-family:var(--mono);}
+.xl-status.sending{background:var(--blue-mid);color:var(--blue);display:block;}
+.xl-status.ok{background:var(--green-light);color:var(--green);display:block;}
+.xl-status.err{background:#FEF2F2;color:var(--red);display:block;}
+.xl-history{margin-top:14px;padding-top:14px;border-top:1px solid #D1FAE5;font-size:11px;display:none;}
+.xl-history-title{color:var(--green);font-weight:600;margin-bottom:8px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;}
+.xl-hist-row{display:flex;gap:12px;padding:3px 0;color:var(--text3);}
+.xl-hist-row .xd{color:var(--green);min-width:90px;font-weight:600;}
+
+/* ── SETUP GUIDE ──────────────────────────────── */
+.setup-guide{margin-top:14px;border:1px solid #A7F3D0;border-radius:10px;overflow:hidden;}
+.setup-guide summary{padding:10px 16px;background:#D1FAE5;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;transition:background 0.15s;}
+.setup-guide summary::-webkit-details-marker{display:none;}
+.setup-guide summary::before{content:'▶';font-size:9px;transition:transform 0.2s;}
+.setup-guide[open] summary::before{transform:rotate(90deg);}
+.setup-body{padding:16px;background:#fff;font-size:12px;color:var(--text2);line-height:1.8;}
+.setup-body ol{padding-left:18px;}
+.setup-body ol li{margin-bottom:5px;}
+.setup-body strong{color:var(--text);}
+.setup-body ul{padding-left:16px;margin-top:4px;}
+/* ── WH TYPE MAPPING ──────────────────────────── */
+.wh-map-card{
+  background:#FAFAFA;border:1.5px solid var(--border);
+  border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;
+  box-shadow:var(--shadow-sm);
+}
+.wh-map-card.loaded{background:#F0FDF4;border-color:#A7F3D0;}
+.wh-map-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.wh-map-title{font-family:var(--display);font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+.wh-map-badge{font-size:10px;padding:3px 9px;border-radius:99px;font-weight:700;background:var(--green-light);color:var(--green);border:1px solid #A7F3D0;font-family:var(--mono);display:none;}
+.wh-map-badge.show{display:inline-block;}
+.wh-map-desc{font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.7;}
+.wh-map-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.wh-map-status{font-size:12px;font-family:var(--mono);padding:6px 12px;border-radius:7px;display:none;margin-top:8px;}
+.wh-map-status.ok{background:var(--green-light);color:var(--green);border:1px solid #A7F3D0;display:block;}
+.wh-map-status.err{background:#FEF2F2;color:var(--red);border:1px solid #FECACA;display:block;}
+.wh-preview-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;display:none;max-height:130px;overflow-y:auto;}
+.wh-preview-table th{background:#F1F5F9;color:var(--text2);font-weight:700;padding:6px 10px;text-align:left;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.wh-preview-table td{padding:5px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);color:var(--text2);}
+.wh-preview-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:10px;max-height:160px;overflow-y:auto;display:none;}
+
+/* ── WH SUMMARY CARDS ─────────────────────────── */
+.wh-summary{display:none;margin:16px 0;}
+.wh-summary-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:10px;}
+.wh-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;}
+.wh-chip{
+  padding:14px 16px;border-radius:12px;border:1px solid var(--border);
+  background:var(--surface);box-shadow:var(--shadow-sm);
+}
+.wh-chip.minutes  {background:#FFF7ED;border-color:#FED7AA;}
+.wh-chip.sourcing {background:#EFF6FF;border-color:#BFDBFE;}
+.wh-chip.deepfc   {background:#F5F3FF;border-color:#DDD6FE;}
+.wh-chip.other    {background:#F8FAFC;border-color:var(--border2);}
+.wh-chip-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;}
+.wh-chip.minutes  .wh-chip-type{color:#EA580C;}
+.wh-chip.sourcing .wh-chip-type{color:#2563EB;}
+.wh-chip.deepfc   .wh-chip-type{color:#7C3AED;}
+.wh-chip.other    .wh-chip-type{color:var(--text3);}
+.wh-chip-metrics{display:flex;flex-direction:column;gap:6px;}
+.wh-metric{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+.wh-metric-label{font-size:11px;color:var(--text3);}
+.wh-metric-val{font-family:var(--display);font-size:18px;font-weight:700;color:var(--text);}
+.wh-chip.minutes  .wh-metric-val{color:#EA580C;}
+.wh-chip.sourcing .wh-metric-val{color:#2563EB;}
+.wh-chip.deepfc   .wh-metric-val{color:#7C3AED;}
+
+.warn-box{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:12px 14px;font-size:12px;color:var(--yellow);margin-top:12px;display:none;line-height:1.8;}
+
+/* ── SCROLLBAR ────────────────────────────────── */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text3);}
+
+/* ── RESPONSIVE ───────────────────────────────── */
+@media(max-width:768px){
+  .shell{flex-direction:column;}
+  .sidebar{width:100%;height:auto;padding:12px 12px 8px;}
+  .nav-steps{flex-direction:row;flex-wrap:wrap;padding:0;}
+  .nav-item{padding:7px 10px;}
+  .nav-info .nav-status{display:none;}
+  .main{height:auto;}
+  .xl-grid{grid-template-columns:1fr;}
+  .topbar{padding:14px 16px;position:relative;}
+  .content{padding:16px 16px 40px;}
+}
+</style>
+</head>
+<body>
+<div class=&quot;shell&quot;>
+
+  <!-- ═══ SIDEBAR ═══════════════════════════════════════════════ -->
+  <aside class=&quot;sidebar&quot;>
+    <div class=&quot;brand&quot;>
+      <div class=&quot;brand-logo&quot;>
+        <div class=&quot;brand-icon-wrap&quot; style=&quot;background:#fff;padding:4px;width:56px;height:56px;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,0.1);&quot;>
+          <img src=&quot;data:image/avif;base64,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&quot; alt=&quot;Boldfit&quot; style=&quot;width:48px;height:48px;object-fit:contain;border-radius:10px;&quot; />
+        </div>
+      </div>
+    </div>
+
+    <div class=&quot;nav-label&quot;>Workflow</div>
+    <nav class=&quot;nav-steps&quot;>
+      <div class=&quot;nav-item active&quot; id=&quot;nav-1&quot; onclick=&quot;goToStep(1)&quot;>
+        <div class=&quot;nav-num&quot;><span>1</span></div>
+        <div class=&quot;nav-info&quot;>
+          <div class=&quot;nav-title&quot;>Acknowledge POs</div>
+          <div class=&quot;nav-status&quot;>Generate ack script</div>
+        </div>
+        <div class=&quot;nav-arrow&quot;>›</div>
+      </div>
+      <div class=&quot;nav-item&quot; id=&quot;nav-2&quot; onclick=&quot;goToStep(2)&quot;>
+        <div class=&quot;nav-num&quot;><span>2</span></div>
+        <div class=&quot;nav-info&quot;>
+          <div class=&quot;nav-title&quot;>Download POs</div>
+          <div class=&quot;nav-status&quot;>Bulk download files</div>
+        </div>
+        <div class=&quot;nav-arrow&quot;>›</div>
+      </div>
+      <div class=&quot;nav-item&quot; id=&quot;nav-3&quot; onclick=&quot;goToStep(3)&quot;>
+        <div class=&quot;nav-num&quot;><span>3</span></div>
+        <div class=&quot;nav-info&quot;>
+          <div class=&quot;nav-title&quot;>Extract GST Data</div>
+          <div class=&quot;nav-status&quot;>Parse PO Excel files</div>
+        </div>
+        <div class=&quot;nav-arrow&quot;>›</div>
+      </div>
+      <div class=&quot;nav-item&quot; id=&quot;nav-4&quot; onclick=&quot;goToStep(4)&quot;>
+        <div class=&quot;nav-num&quot;><span>4</span></div>
+        <div class=&quot;nav-info&quot;>
+          <div class=&quot;nav-title&quot;>Map &amp; Export</div>
+          <div class=&quot;nav-status&quot;>Warehouse mapping</div>
+        </div>
+        <div class=&quot;nav-arrow&quot;>›</div>
+      </div>
+    </nav>
+
+    <div class=&quot;sidebar-footer&quot;>
+      <div class=&quot;version-tag&quot;>boldfit · PO Command Centre</div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══════════════════════════════════════════════════ -->
+  <div class=&quot;main&quot;>
+    <div class=&quot;topbar&quot;>
+      <div>
+        <div class=&quot;page-title&quot; id=&quot;pageTitle&quot;>Acknowledge POs</div>
+        <div class=&quot;page-subtitle&quot; id=&quot;pageSubtitle&quot;>Step 1 of 4 — Generate bulk acknowledgement script</div>
+      </div>
+      <div class=&quot;topbar-right&quot;>
+        <div class=&quot;progress-pill&quot;>
+          <div class=&quot;progress-dots&quot;>
+            <div class=&quot;pdot active&quot; id=&quot;pd1&quot;></div>
+            <div class=&quot;pdot&quot; id=&quot;pd2&quot;></div>
+            <div class=&quot;pdot&quot; id=&quot;pd3&quot;></div>
+            <div class=&quot;pdot&quot; id=&quot;pd4&quot;></div>
+          </div>
+          <span id=&quot;progressText&quot;>1 / 4</span>
+        </div>
+      </div>
+    </div>
+
+    <div class=&quot;content&quot;>
+
+      <!-- ══ STEP 1 ══════════════════════════════════════════════ -->
+      <div class=&quot;panel active&quot; id=&quot;panel-1&quot;>
+        <div class=&quot;card card-accent&quot;>
+          <div class=&quot;card-header&quot;>
+            <div class=&quot;card-icon&quot;>✅</div>
+            <div>
+              <div class=&quot;card-title&quot;>Bulk Acknowledge POs <span class=&quot;badge-new&quot;>New</span></div>
+              <div class=&quot;card-desc&quot;>Paste your PO numbers, generate a console script, and acknowledge all POs in Vendor Hub in one shot — no clicking through each one.</div>
+            </div>
+          </div>
+          <div class=&quot;instructions&quot;>
+            <ol>
+              <li>Log in to <a href=&quot;https://vendorhub.flipkart.com&quot; target=&quot;_blank&quot;>vendorhub.flipkart.com</a> in your browser</li>
+              <li>Paste your PO numbers below and click <strong>Generate Script</strong></li>
+              <li>Click <strong>Copy Script</strong> → press <code>F12</code> → Console tab on Vendor Hub</li>
+              <li>Paste and press <code>Enter</code> — each PO logs <code>✅</code> or <code>⚠</code> as it runs</li>
+              <li>Come back here and click <strong>Next →</strong> — your PO list carries over automatically</li>
+            </ol>
+          </div>
+
+          <label class=&quot;field-label&quot;>PO Numbers <span>— one per line or comma-separated</span></label>
+          <textarea id=&quot;ackPoInput&quot; rows=&quot;7&quot; placeholder=&quot;FHGWN08117041&amp;#10;FHGWN08116824&amp;#10;FBPWN08131032&amp;#10;...&quot;></textarea>
+
+          <div class=&quot;btn-group&quot;>
+            <button class=&quot;btn btn-primary&quot; onclick=&quot;generateAckScript()&quot;>⚡ Generate Script</button>
+            <span class=&quot;btn-count&quot; id=&quot;ack-po-count&quot;></span>
+          </div>
+        </div>
+
+        <div class=&quot;code-block&quot; id=&quot;ackScriptOutput&quot;>
+          <div class=&quot;code-header&quot;>
+            <span class=&quot;code-filename&quot;>acknowledge-console-script.js</span>
+            <div style=&quot;display:flex;gap:8px;align-items:center;&quot;>
+              <span class=&quot;copy-ok&quot; id=&quot;ackCopyOk&quot;>✓ copied</span>
+              <button class=&quot;btn btn-ghost btn-sm&quot; onclick=&quot;copyAckScript()&quot;>Copy Script</button>
+            </div>
+          </div>
+          <div class=&quot;code-body&quot; id=&quot;ackScriptBody&quot;></div>
+        </div>
+
+        <div class=&quot;panel-footer&quot;>
+          <span class=&quot;panel-footer-note&quot;>After acknowledging all POs in Vendor Hub, proceed to download them.</span>
+          <button class=&quot;btn btn-primary&quot; onclick=&quot;goToStep(2)&quot;>Next: Download POs →</button>
+        </div>
+      </div>
+
+      <!-- ══ STEP 2 ══════════════════════════════════════════════ -->
+      <div class=&quot;panel&quot; id=&quot;panel-2&quot;>
+        <div class=&quot;card card-accent&quot;>
+          <div class=&quot;card-header&quot;>
+            <div class=&quot;card-icon orange&quot;>📥</div>
+            <div>
+              <div class=&quot;card-title&quot;>Bulk Download POs</div>
+              <div class=&quot;card-desc&quot;>Your PO list has been carried over from Step 1. Generate the download script and run it in Vendor Hub console to save all PO files at once.</div>
+            </div>
+          </div>
+          <div class=&quot;instructions&quot;>
+            <ol>
+              <li>Confirm or edit your PO numbers below (pre-filled from Step 1)</li>
+              <li>Click <strong>Generate Script</strong> then <strong>Copy Script</strong></li>
+              <li>Press <code>F12</code> → Console on <a href=&quot;https://vendorhub.flipkart.com&quot; target=&quot;_blank&quot;>Vendor Hub</a> → paste and run</li>
+              <li>Files download automatically — then come back and proceed to Step 3</li>
+            </ol>
+          </div>
+
+          <label class=&quot;field-label&quot;>PO Numbers <span>— one per line or comma-separated</span></label>
+          <textarea id=&quot;poInput&quot; rows=&quot;7&quot; placeholder=&quot;FHGWN08117041&amp;#10;FHGWN08116824&amp;#10;...&quot;></textarea>
+
+          <div class=&quot;btn-group&quot;>
+            <button class=&quot;btn btn-primary&quot; onclick=&quot;generateScript()&quot;>⚡ Generate Script</button>
+            <span class=&quot;btn-count&quot; id=&quot;po-count&quot;></span>
+          </div>
+        </div>
+
+        <div class=&quot;code-block&quot; id=&quot;scriptOutput&quot;>
+          <div class=&quot;code-header&quot;>
+            <span class=&quot;code-filename&quot;>download-console-script.js</span>
+            <div style=&quot;display:flex;gap:8px;align-items:center;&quot;>
+              <span class=&quot;copy-ok&quot; id=&quot;copyOk&quot;>✓ copied</span>
+              <button class=&quot;btn btn-ghost btn-sm&quot; onclick=&quot;copyScript()&quot;>Copy Script</button>
+            </div>
+          </div>
+          <div class=&quot;code-body&quot; id=&quot;scriptBody&quot;></div>
+        </div>
+
+        <div class=&quot;panel-footer&quot;>
+          <button class=&quot;btn btn-ghost&quot; onclick=&quot;goToStep(1)&quot;>← Back</button>
+          <button class=&quot;btn btn-primary&quot; onclick=&quot;goToStep(3)&quot;>Next: Extract Data →</button>
+        </div>
+      </div>
+
+      <!-- ══ STEP 3 ══════════════════════════════════════════════ -->
+      <div class=&quot;panel&quot; id=&quot;panel-3&quot;>
+        <div class=&quot;card card-accent&quot;>
+          <div class=&quot;card-header&quot;>
+            <div class=&quot;card-icon purple&quot;>🔍</div>
+            <div>
+              <div class=&quot;card-title&quot;>Extract GST Data</div>
+              <div class=&quot;card-desc&quot;>Upload the PO Excel files downloaded in Step 2. The tool extracts FSN, GST rates, quantities and more — entirely in your browser, nothing uploaded anywhere.</div>
+            </div>
+          </div>
+          <div class=&quot;instructions&quot;>
+            <ol>
+              <li>Upload all <code>.xlsx</code> / <code>.xls</code> PO files from Step 2 (drag &amp;amp; drop or click)</li>
+              <li>Click <strong>Extract Data</strong> — all processing happens locally</li>
+              <li>Preview the results below, then continue to Step 4</li>
+            </ol>
+          </div>
+
+          <input type=&quot;file&quot; id=&quot;fileInput&quot; accept=&quot;.xlsx,.xls&quot; multiple onchange=&quot;handleFileSelect(this.files)&quot;>
+          <div class=&quot;drop-zone&quot; id=&quot;dropZone&quot; onclick=&quot;document.getElementById('fileInput').click()&quot;>
+            <span class=&quot;dz-icon&quot;>📂</span>
+            <p><strong>Click to select files</strong> or drag &amp;amp; drop here<br>Accepts <code>.xlsx</code> and <code>.xls</code> — multiple files supported</p>
+          </div>
+
+          <div class=&quot;file-list&quot; id=&quot;fileList&quot;></div>
+          <div class=&quot;prog-wrap&quot; id=&quot;progressWrap&quot;><div class=&quot;prog-bar&quot; id=&quot;progressBar&quot;></div></div>
+          <div class=&quot;prog-label&quot; id=&quot;progressLabel&quot;></div>
+          <div class=&quot;result-band&quot; id=&quot;resultSummary&quot;></div>
+          <div class=&quot;warn-box&quot; id=&quot;warnBox&quot;></div>
+          <div class=&quot;table-wrap&quot; id=&quot;previewWrap&quot;><table id=&quot;previewTable&quot;></table></div>
+        </div>
+
+        <div class=&quot;panel-footer&quot;>
+          <button class=&quot;btn btn-ghost&quot; onclick=&quot;goToStep(2)&quot;>← Back</button>
+          <div style=&quot;display:flex;gap:10px;&quot;>
+            <button class=&quot;btn btn-primary&quot; id=&quot;extractBtn&quot; onclick=&quot;extractData()&quot; disabled>⚡ Extract Data</button>
+            <button class=&quot;btn btn-primary&quot; id=&quot;nextToMapBtn&quot; onclick=&quot;goToStep(4)&quot; style=&quot;display:none;&quot;>Next: Map &amp; Export →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STEP 4 ══════════════════════════════════════════════ -->
+      <div class=&quot;panel&quot; id=&quot;panel-4&quot;>
+        <div class=&quot;card card-accent&quot;>
+          <div class=&quot;card-header&quot;>
+            <div class=&quot;card-icon green&quot;>📋</div>
+            <div>
+              <div class=&quot;card-title&quot;>Map Warehouse &amp;amp; Export</div>
+              <div class=&quot;card-desc&quot;>Upload your mapping CSV with <code style=&quot;font-family:var(--mono);font-size:11px;background:var(--blue-dim);color:#7eb3ff;padding:1px 5px;border-radius:3px;&quot;>Purchase Order ID</code>, <code style=&quot;font-family:var(--mono);font-size:11px;background:var(--blue-dim);color:#7eb3ff;padding:1px 5px;border-radius:3px;&quot;>Vendor Site ID</code> and <code style=&quot;font-family:var(--mono);font-size:11px;background:var(--blue-dim);color:#7eb3ff;padding:1px 5px;border-radius:3px;&quot;>Origin Warehouse</code> columns.</div>
+            </div>
+          </div>
+          <div class=&quot;instructions&quot;>
+            <ol>
+              <li>Upload the mapping CSV (columns: <strong>Purchase Order ID</strong>, <strong>Vendor Site ID</strong>, <strong>Origin Warehouse</strong>)</li>
+              <li>Click <strong>Run Mapping</strong> — unmatched POs get blank warehouse fields</li>
+              <li>Review the match summary, then <strong>Download Final Sheet</strong> or push to Excel</li>
+            </ol>
+          </div>
+
+          <!-- WH Type Mapping (persistent) -->
+          <div class=&quot;wh-map-card&quot; id=&quot;whMapCard&quot;>
+            <div class=&quot;wh-map-header&quot;>
+              <div class=&quot;wh-map-title&quot;>
+                🏭 WH Type Mapping
+                <span class=&quot;wh-map-badge&quot; id=&quot;whMapBadge&quot;></span>
+              </div>
+              <div style=&quot;display:flex;gap:8px;&quot;>
+                <label class=&quot;btn btn-ghost btn-sm&quot; style=&quot;cursor:pointer;&quot;>
+                  ↑ Upload / Update
+                  <input type=&quot;file&quot; id=&quot;whMappingInput&quot; accept=&quot;.csv,.xlsx,.xls&quot; style=&quot;display:none;&quot; onchange=&quot;handleWhMappingFile(this.files)&quot;>
+                </label>
+                <button class=&quot;btn btn-ghost btn-sm&quot; onclick=&quot;clearWhMapping()&quot; id=&quot;whMapClearBtn&quot; style=&quot;display:none;color:var(--red);border-color:#FECACA;&quot;>✕ Clear</button>
+              </div>
+            </div>
+            <div class=&quot;wh-map-desc&quot;>Upload a CSV or Excel file with <code style=&quot;font-family:var(--mono);font-size:11px;background:var(--blue-light);color:var(--blue);padding:1px 5px;border-radius:3px;&quot;>WH_Code</code> and <code style=&quot;font-family:var(--mono);font-size:11px;background:var(--blue-light);color:var(--blue);padding:1px 5px;border-radius:3px;&quot;>WH_type</code> columns. Saved automatically — upload again anytime to update.</div>
+            <div class=&quot;wh-map-status&quot; id=&quot;whMapStatus&quot;></div>
+            <div class=&quot;wh-preview-wrap&quot; id=&quot;whPreviewWrap&quot;>
+              <table class=&quot;wh-preview-table&quot; id=&quot;whPreviewTable&quot; style=&quot;display:table;width:100%;&quot;></table>
+            </div>
+          </div>
+
+          <input type=&quot;file&quot; id=&quot;csvInput&quot; accept=&quot;.csv&quot; onchange=&quot;handleCsvSelect(this.files)&quot;>
+          <div class=&quot;drop-zone&quot; id=&quot;csvDropZone&quot; onclick=&quot;document.getElementById('csvInput').click()&quot;>
+            <span class=&quot;dz-icon&quot;>📋</span>
+            <p><strong>Click to upload mapping CSV</strong> or drag &amp;amp; drop<br>Accepts <code>.csv</code> files only</p>
+          </div>
+
+          <div class=&quot;file-chip pending&quot; id=&quot;csvFileChip&quot; style=&quot;display:none;margin-bottom:12px;&quot;>
+            <span>📄</span>
+            <span class=&quot;fc-name&quot; id=&quot;csvFileName&quot;></span>
+            <span class=&quot;fc-status&quot; id=&quot;csvFileStatus&quot;>Ready</span>
+          </div>
+
+          <div class=&quot;result-band&quot; id=&quot;mapSummary&quot;></div>
+
+          <div id=&quot;matchBreakdown&quot; style=&quot;display:none;&quot;>
+            <div class=&quot;stat-row&quot;>
+              <div class=&quot;stat-chip ok-chip&quot;>
+                <div class=&quot;stat-label&quot;>Matched POs</div>
+                <div class=&quot;stat-value&quot; id=&quot;matchedCount&quot;>0</div>
+              </div>
+              <div class=&quot;stat-chip warn-chip&quot;>
+                <div class=&quot;stat-label&quot;>Unmatched POs</div>
+                <div class=&quot;stat-value&quot; id=&quot;unmatchedCount&quot;>0</div>
+              </div>
+            </div>
+            <div class=&quot;unmatched-box&quot; id=&quot;unmatchedList&quot;></div>
+          </div>
+
+          <div class=&quot;table-wrap&quot; id=&quot;finalPreviewWrap&quot;><table id=&quot;finalPreviewTable&quot;></table></div>
+
+          <!-- WH Type Summary -->
+          <div class=&quot;wh-summary&quot; id=&quot;whSummary&quot;>
+            <div class=&quot;wh-summary-title&quot;>📊 WH Type Breakdown — PO Count &amp;amp; Quantity</div>
+            <div class=&quot;wh-summary-grid&quot; id=&quot;whSummaryGrid&quot;></div>
+          </div>
+        </div>
+
+        <!-- Excel Push -->
+        <div class=&quot;xl-card&quot; id=&quot;xlSection&quot;>
+          <div class=&quot;xl-title&quot;>📗 Push to Excel Online — Daily PO Tracker</div>
+          <div class=&quot;xl-desc&quot;>Appends today's date + all mapped rows directly to your OneDrive Excel file. Data is always appended — never overwritten. Run daily to build a full PO history.</div>
+
+          <div class=&quot;xl-radio-row&quot;>
+            <label><input type=&quot;radio&quot; name=&quot;xlAccountType&quot; value=&quot;common&quot; checked onchange=&quot;saveXlSettings()&quot;> Work / School account</label>
+            <label><input type=&quot;radio&quot; name=&quot;xlAccountType&quot; value=&quot;consumers&quot; onchange=&quot;saveXlSettings()&quot;> Personal account (Outlook / Hotmail)</label>
+          </div>
+          <div class=&quot;xl-grid&quot;>
+            <div class=&quot;xl-field&quot;>
+              <label>Azure App Client ID <span style=&quot;font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:var(--text3);&quot;>— saved automatically</span></label>
+              <input type=&quot;text&quot; id=&quot;xlClientId&quot; placeholder=&quot;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&quot; oninput=&quot;saveXlSettings()&quot;>
+            </div>
+            <div class=&quot;xl-field&quot;>
+              <label>OneDrive Excel File URL</label>
+              <input type=&quot;text&quot; id=&quot;xlFileUrl&quot; placeholder=&quot;https://onedrive.live.com/...&quot; oninput=&quot;saveXlSettings()&quot;>
+            </div>
+          </div>
+          <div class=&quot;xl-actions&quot;>
+            <button class=&quot;btn-ms&quot; id=&quot;xlSignInBtn&quot; onclick=&quot;signInMicrosoft()&quot;>🔑 Sign in with Microsoft</button>
+            <span class=&quot;signed-badge&quot; id=&quot;xlSignedInBadge&quot;></span>
+            <button class=&quot;btn btn-success&quot; id=&quot;xlPushBtn&quot; onclick=&quot;pushToExcel()&quot;>📗 Add to Excel</button>
+          </div>
+          <div class=&quot;xl-status&quot; id=&quot;xlStatus&quot;></div>
+          <div class=&quot;xl-history&quot; id=&quot;xlHistory&quot;>
+            <div class=&quot;xl-history-title&quot;>// push history</div>
+            <div id=&quot;xlHistoryList&quot;></div>
+          </div>
+
+          <details class=&quot;setup-guide&quot; style=&quot;margin-top:16px;&quot;>
+            <summary>⚙️ One-time Azure setup — How to connect your Excel file</summary>
+            <div class=&quot;setup-body&quot;>
+              <ol>
+                <li>Go to <strong>portal.azure.com</strong> → search <strong>App registrations</strong> → <strong>New registration</strong></li>
+                <li>Name: anything. Account type: <strong>Accounts in any org + personal Microsoft accounts</strong></li>
+                <li>Redirect URI: <strong>Single-page application</strong> → enter <strong>http://localhost</strong></li>
+                <li>Click <strong>Register</strong> → copy the <strong>Application (client) ID</strong> → paste above</li>
+                <li>Go to <strong>API permissions → Add → Microsoft Graph → Delegated → Files.ReadWrite</strong> → grant consent</li>
+                <li>Open your Excel file in OneDrive browser → copy URL → paste above</li>
+                <li>Click <strong>Sign in with Microsoft</strong> then <strong>Add to Excel</strong></li>
+              </ol>
+              <p style=&quot;margin-top:8px;color:var(--text3);font-size:11px;&quot;>💡 If your org blocks app approvals, send your IT admin:<br>
+              <code style=&quot;font-family:var(--mono);font-size:10px;color:#7eb3ff;&quot;>https://login.microsoftonline.com/common/adminconsent?client_id=YOUR_CLIENT_ID&amp;redirect_uri=http://localhost</code></p>
+            </div>
+          </details>
+        </div>
+
+        <div class=&quot;panel-footer&quot;>
+          <button class=&quot;btn btn-ghost&quot; onclick=&quot;goToStep(3)&quot;>← Back</button>
+          <div style=&quot;display:flex;gap:10px;&quot;>
+            <button class=&quot;btn btn-ghost&quot; id=&quot;mapBtn&quot; onclick=&quot;runMapping()&quot; disabled>⚡ Run Mapping</button>
+            <button class=&quot;btn btn-success&quot; id=&quot;finalDownloadBtn&quot; onclick=&quot;downloadFinalExcel()&quot; style=&quot;display:none;&quot;>⬇ Download Excel</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+// ── STATE ────────────────────────────────────────────────────
+let selectedFiles = [], extractedData = [], mappedData = [], csvMapping = null;
+const TOTAL = 4;
+
+const EXTRACT_COLS = [&quot;PO Number&quot;,&quot;FSN&quot;,&quot;Title&quot;,&quot;Quantity&quot;,&quot;Pending Quantity&quot;,
+  &quot;Supplier Price&quot;,&quot;Vertical&quot;,&quot;Style Code&quot;,&quot;Required by Date&quot;,
+  &quot;IGST Rate&quot;,&quot;SGST/UTGST Rate&quot;,&quot;CGST Rate&quot;,&quot;Source File&quot;];
+
+const FINAL_COLS = [&quot;PO Number&quot;,&quot;Vendor Site ID&quot;,&quot;Origin Warehouse&quot;,&quot;WH Type&quot;,&quot;FSN&quot;,&quot;Title&quot;,
+  &quot;Quantity&quot;,&quot;Pending Quantity&quot;,&quot;Supplier Price&quot;,&quot;Vertical&quot;,&quot;Style Code&quot;,
+  &quot;Required by Date&quot;,&quot;IGST Rate&quot;,&quot;SGST/UTGST Rate&quot;,&quot;CGST Rate&quot;,&quot;Source File&quot;];
+
+const PAGE_META = [
+  {title:'Acknowledge POs',      sub:'Step 1 of 4 — Generate bulk acknowledgement script'},
+  {title:'Download POs',         sub:'Step 2 of 4 — Generate bulk download script'},
+  {title:'Extract GST Data',     sub:'Step 3 of 4 — Parse PO Excel files'},
+  {title:'Map &amp; Export',         sub:'Step 4 of 4 — Warehouse mapping &amp; final export'},
+];
+
+// ── NAVIGATION ───────────────────────────────────────────────
+function goToStep(n) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + n).classList.add('active');
+  for (let i = 1; i <= TOTAL; i++) {
+    const nav = document.getElementById('nav-' + i);
+    const pd  = document.getElementById('pd' + i);
+    const num = nav.querySelector('.nav-num');
+    nav.classList.remove('active','done');
+    pd.classList.remove('active','done');
+    if (i < n) {
+      nav.classList.add('done');
+      pd.classList.add('done');
+      num.innerHTML = '✓';
+    } else if (i === n) {
+      nav.classList.add('active');
+      pd.classList.add('active');
+      num.innerHTML = '<span>' + i + '</span>';
+    } else {
+      num.innerHTML = '<span>' + i + '</span>';
+    }
+  }
+  document.getElementById('pageTitle').textContent   = PAGE_META[n-1].title;
+  document.getElementById('pageSubtitle').textContent = PAGE_META[n-1].sub;
+  document.getElementById('progressText').textContent = n + ' / ' + TOTAL;
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  if (n === 2) {
+    const ack = document.getElementById('ackPoInput').value.trim();
+    const dl  = document.getElementById('poInput').value.trim();
+    if (ack &amp;&amp; !dl) document.getElementById('poInput').value = ack;
+  }
+}
+
+function parsePONumbers(raw) {
+  return raw.split(/[\n,]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+}
+
+// ── STEP 1 — ACK SCRIPT ──────────────────────────────────────
+function generateAckScript() {
+  const pos = parsePONumbers(document.getElementById('ackPoInput').value);
+  if (!pos.length) { alert('Please enter at least one PO number.'); return; }
+  document.getElementById('ack-po-count').textContent = pos.length + ' PO' + (pos.length > 1 ? 's' : '');
+  const d = new Date(), dd = String(d.getDate()).padStart(2,'0'), mm = String(d.getMonth()+1).padStart(2,'0');
+  const today = dd + '-' + mm + '-' + d.getFullYear();
+  const poListStr = pos.map(p => &quot;    '&quot; + p + &quot;'&quot;).join(',\n');
+  generatedAckScript = `(async () => {
+  const poNumbers = [\n${poListStr}\n  ];
+  const csrfToken = window.csrfToken;
+  if (!csrfToken) { console.error('❌ csrfToken not found — run on vendorhub.flipkart.com'); return; }
+  const d = new Date();
+  const deliveryDate = String(d.getDate()).padStart(2,'0') + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + d.getFullYear();
+  console.log('%c FK Bulk Acknowledge', 'font-size:15px;font-weight:bold;color:#2874f0;');
+  const success = [], failed = [];
+  for (const poId of poNumbers) {
+    try {
+      const res = await fetch('/vendor/acknowledgement/purchase-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
+        body: JSON.stringify({ purchase_orders: [{ delivery_date: deliveryDate, comments: '', purchase_order_id: poId }] })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok &amp;&amp; data?.purchase_orders?.[0]?.message === 'success') {
+        success.push(poId); console.log('%c ✅ ' + poId, 'color:green;font-weight:bold;');
+      } else { failed.push(poId); console.warn('%c ⚠️ ' + poId + ' — HTTP ' + res.status, 'color:orange;', data); }
+    } catch(e) { failed.push(poId); console.error('%c ❌ ' + poId + ' — ' + e.message, 'color:red;'); }
+    await new Promise(r => setTimeout(r, 300));
+  }
+  console.log('%c ══ Done: ' + success.length + '/' + poNumbers.length + ' acknowledged ══', 'font-size:14px;font-weight:bold;color:#2874f0;');
+  if (failed.length) console.warn('Failed:', failed);
+})();`;
+
+  document.getElementById('ackScriptBody').innerHTML =
+    `<span class=&quot;cm&quot;>// FK Vendor Hub — Bulk Acknowledge · ${pos.length} PO(s) · date: ${today}</span>\n` +
+    `<span class=&quot;kw&quot;>const</span> poNumbers = [\n` +
+    pos.map(p => `  <span class=&quot;po&quot;>&quot;${p}&quot;</span>`).join(',\n') +
+    `\n];\n<span class=&quot;cm&quot;>// Sends one request per PO · checks response · logs ✅ / ⚠️</span>`;
+  document.getElementById('ackScriptOutput').style.display = 'block';
+}
+
+let generatedAckScript = '';
+function copyAckScript() {
+  if (!generatedAckScript) { alert('Generate the script first.'); return; }
+  _doCopy(generatedAckScript, 'ackCopyOk');
+}
+
+// ── STEP 2 — DOWNLOAD SCRIPT ─────────────────────────────────
+let generatedScript = '';
+function generateScript() {
+  const pos = parsePONumbers(document.getElementById('poInput').value);
+  if (!pos.length) { alert('Please enter at least one PO number.'); return; }
+  document.getElementById('po-count').textContent = pos.length + ' PO' + (pos.length > 1 ? 's' : '');
+  const poListStr = pos.map(p => '  &quot;' + p + '&quot;').join(',\n');
+  generatedScript = `// FK PO Bulk Downloader · ${pos.length} PO(s)
+// Paste in Console (F12) on vendorhub.flipkart.com
+const PO_NUMBERS = [\n${poListStr}\n];
+const BATCH_SIZE = 3, BATCH_DELAY = 1000;
+function getExt(r){var d=r.headers.get('content-disposition')||'';if(d){var fi=d.toLowerCase().indexOf('filename');if(fi!==-1){var p=d.slice(fi+8).replace(/^[^=]+=/).trim().replace(/^[\&quot;']/,'').split(/[\&quot;';\\s]/)[0].trim();var e=p.split('.').pop().toLowerCase();if(e&amp;&amp;e.length<6)return e;}}var ct=r.headers.get('content-type')||'';return ct.includes('openxmlformats')?'xlsx':ct.includes('ms-excel')?'xls':ct.includes('csv')?'csv':'xls';}
+async function dl(po){const r=await fetch('/vendor/purchase-order-download?id='+po,{credentials:'include'});if(!r.ok)throw new Error('HTTP '+r.status);const e=getExt(r);const b=await r.blob();const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=po+'.'+e;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),10000);return e;}
+async function run(){const t=PO_NUMBERS.length,bt=Math.ceil(t/BATCH_SIZE);console.log('%c FK PO Downloader','font-size:16px;font-weight:bold;color:#2874f0;');let ok=0,fail=0;for(let b=0;b<bt;b++){const batch=PO_NUMBERS.slice(b*BATCH_SIZE,(b+1)*BATCH_SIZE).map(p=>p.trim().toUpperCase());console.log('Batch '+(b+1)+'/'+bt);const res=await Promise.allSettled(batch.map(p=>dl(p)));res.forEach((r,i)=>{if(r.status==='fulfilled'){console.log('%c ✓ '+batch[i]+'.'+r.value,'color:green;font-weight:bold;');ok++;}else{console.log('%c ✗ '+batch[i]+' — '+r.reason.message,'color:red;font-weight:bold;');fail++;}});if(b<bt-1)await new Promise(r=>setTimeout(r,BATCH_DELAY));}console.log('%c Done — '+ok+' downloaded, '+fail+' failed.','font-size:14px;font-weight:bold;color:#2874f0;');}
+run();`;
+  document.getElementById('scriptBody').innerHTML =
+    `<span class=&quot;cm&quot;>// FK PO Bulk Downloader — Paste in Vendor Hub Console</span>\n` +
+    `<span class=&quot;kw&quot;>const</span> PO_NUMBERS = [\n` +
+    pos.map(p => `  <span class=&quot;po&quot;>&quot;${p}&quot;</span>`).join(',\n') +
+    `\n];\n<span class=&quot;cm&quot;>// batches of 3 · 1s between batches · auto-detects file extension</span>\n<span class=&quot;fn&quot;>run</span>();`;
+  document.getElementById('scriptOutput').style.display = 'block';
+}
+
+function copyScript() {
+  if (!generatedScript) { alert('Generate the script first.'); return; }
+  _doCopy(generatedScript, 'copyOk');
+}
+
+// ── COPY HELPERS ─────────────────────────────────────────────
+function _doCopy(text, feedbackId) {
+  const show = (ok) => {
+    const el = feedbackId ? document.getElementById(feedbackId) : null;
+    if (!el) return;
+    el.style.display = 'inline';
+    el.textContent   = ok ? '✓ copied' : '⚠ copy manually';
+    el.style.color   = ok ? 'var(--green)' : 'var(--yellow)';
+    setTimeout(() => { el.style.display = 'none'; }, 2500);
+  };
+  if (navigator.clipboard &amp;&amp; window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => show(true)).catch(() => _fbCopy(text, show));
+  } else { _fbCopy(text, show); }
+}
+function _fbCopy(text, cb) {
+  const ta = Object.assign(document.createElement('textarea'), {value: text});
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta); cb(ok);
+}
+
+// ── STEP 3 — FILE EXTRACT ────────────────────────────────────
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('over'); handleFileSelect(e.dataTransfer.files); });
+
+function handleFileSelect(files) {
+  selectedFiles = Array.from(files).filter(f => f.name.match(/\.(xlsx|xls)$/i));
+  renderFileList();
+  document.getElementById('extractBtn').disabled = !selectedFiles.length;
+  document.getElementById('nextToMapBtn').style.display = 'none';
+  document.getElementById('resultSummary').className = 'result-band';
+  document.getElementById('previewWrap').style.display = 'none';
+  document.getElementById('warnBox').style.display = 'none';
+  extractedData = [];
+}
+
+function renderFileList(statuses) {
+  document.getElementById('fileList').innerHTML = selectedFiles.map((f, i) => {
+    const s = statuses ? statuses[i] : 'pending';
+    const label = s === 'ok' ? '✓ Processed' : s === 'err' ? '✗ Error' : '· Queued';
+    return `<div class=&quot;file-chip ${s}&quot;><span>📄</span><span class=&quot;fc-name&quot;>${f.name}</span><span class=&quot;fc-status&quot;>${label}</span></div>`;
+  }).join('');
+}
+
+function readFileAsArrayBuffer(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('Read failed')); r.readAsArrayBuffer(file);
+  });
+}
+
+function mapColumns(headers) {
+  const m = {};
+  headers.forEach((col, idx) => {
+    const cu = col.toUpperCase().trim();
+    if (!cu) return;
+    // FSN — also mapped from &quot;Product ID&quot; in FLS-style POs
+    if ((cu.includes('FSN') || cu.includes('ISBN') || cu === 'PRODUCT ID') &amp;&amp; m.FSN === undefined) m.FSN = idx;
+    if (cu.includes('IGST') &amp;&amp; cu.includes('RATE') &amp;&amp; m.IGST === undefined) m.IGST = idx;
+    if (cu.includes('SGST') &amp;&amp; cu.includes('RATE') &amp;&amp; m.SGST === undefined) m.SGST = idx;
+    if (cu.includes('CGST') &amp;&amp; cu.includes('RATE') &amp;&amp; m.CGST === undefined) m.CGST = idx;
+    if (cu.includes('PENDING') &amp;&amp; (cu.includes('QUANT') || cu.includes('QTY')) &amp;&amp; m.PENDING_QTY === undefined) m.PENDING_QTY = idx;
+    if ((cu === 'QUANTITY' || cu === 'QTY') &amp;&amp; m.QTY === undefined) m.QTY = idx;
+    if (cu.trim() === 'TITLE' &amp;&amp; m.TITLE === undefined) m.TITLE = idx;
+    // Supplier price — also &quot;Supplier Unit Price&quot;
+    if (cu.includes('SUPPLIER') &amp;&amp; (cu.includes('PRICE') || cu.includes('UNIT')) &amp;&amp; m.SUPPLIER_PRICE === undefined) m.SUPPLIER_PRICE = idx;
+    if (cu.includes('VERTICAL') &amp;&amp; m.VERTICAL === undefined) m.VERTICAL = idx;
+    if (cu.includes('STYLE') &amp;&amp; cu.includes('CODE') &amp;&amp; m.STYLE_CODE === undefined) m.STYLE_CODE = idx;
+    if (cu.includes('REQUIRED') &amp;&amp; cu.includes('DATE') &amp;&amp; m.REQUIRED_DATE === undefined) m.REQUIRED_DATE = idx;
+  });
+  return m;
+}
+
+async function extractData() {
+  if (!selectedFiles.length) return;
+  extractedData = [];
+  const statuses = selectedFiles.map(() => 'pending');
+  renderFileList(statuses);
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('progressLabel').style.display = 'block';
+  document.getElementById('extractBtn').disabled = true;
+  const warnings = [], diag = [];
+
+  for (let fi = 0; fi < selectedFiles.length; fi++) {
+    const file = selectedFiles[fi];
+    document.getElementById('progressBar').style.width = Math.round((fi / selectedFiles.length) * 100) + '%';
+    document.getElementById('progressLabel').textContent = `Processing ${fi+1} of ${selectedFiles.length}: ${file.name}`;
+    try {
+      const buf = await readFileAsArrayBuffer(file);
+      const wb  = XLSX.read(buf, { type: 'array', raw: false });
+      let fileRows = 0;
+      for (const sheetName of wb.SheetNames) {
+        const aoa = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: '' });
+        let poNumber = '', headerRowIdx = null;
+        for (let i = 0; i < aoa.length; i++) {
+          const row = aoa[i].map(v => String(v).trim());
+          // PO detection — handles both &quot;PO#&quot; + next cell AND &quot;PURCHASE ORDER NO - XXXXX&quot; in one cell
+          if (!poNumber) {
+            for (let j = 0; j < row.length; j++) {
+              const cell = row[j];
+              const m1 = cell.match(/purchase\s+order\s+no[\s\-\u2013:]+([A-Z0-9]{8,})/i);
+              if (m1) { poNumber = m1[1]; break; }
+              if (cell.replace(/\s/g,'').toUpperCase() === 'PO#' &amp;&amp; row[j+1]) { poNumber = row[j+1]; break; }
+            }
+          }
+          // Header detection — handles FSN, ISBN, Product ID, or Title+IGST together
+          if (headerRowIdx === null) {
+            const hasProductId = row.some(v => v.toUpperCase().trim() === 'PRODUCT ID');
+            const hasFSN       = row.some(v => v.toUpperCase().includes('FSN') || v.toUpperCase().includes('ISBN'));
+            const hasTitleRates = row.some(v => v.trim().toUpperCase() === 'TITLE') &amp;&amp; row.some(v => v.toUpperCase().includes('IGST'));
+            if (hasProductId || hasFSN || hasTitleRates) headerRowIdx = i;
+          }
+          if (poNumber &amp;&amp; headerRowIdx !== null) break;
+        }
+        if (headerRowIdx === null) { warnings.push(`&quot;${sheetName}&quot; in ${file.name}: header row not found`); continue; }
+
+        // Merge split headers — FLS format puts Product ID/Qty on row N, Title/IGST/etc on row N+1
+        const hRow1 = aoa[headerRowIdx].map(v => String(v).trim());
+        const hRow2 = (headerRowIdx + 1 < aoa.length) ? aoa[headerRowIdx + 1].map(v => String(v).trim()) : [];
+
+        // row2IsHeader: true when FLS split-header format (row2 has Title, IGST Rate, Vertical etc.)
+        const row2IsHeader = hRow2.some(v => /^(title|igst|sgst|cgst|vertical|supplier.*unit|required.*date|ean)$/i.test(v.trim()));
+        const dataStart    = row2IsHeader ? headerRowIdx + 2 : headerRowIdx + 1;
+
+        // Smart merge: if row2 has a recognised column name at position i, prefer it
+        // (handles FLS format where &quot;Product Details&quot; in row1 blocks &quot;Title&quot; in row2)
+        const knownCol = /^(title|ean|brand|color|model|ram|vertical|required.*date|supplier.*unit|supplier.*price|igst.*rate|sgst.*rate|cgst.*rate|cess.*rate|pending.*quant|quantity|approved)$/i;
+        const maxLen = Math.max(hRow1.length, hRow2.length);
+        const combinedHdrs = Array.from({ length: maxLen }, (_, i) => {
+          const h1 = (hRow1[i] || '').trim();
+          const h2 = (hRow2[i] || '').trim();
+          // If row2 has a recognised header at this position, it wins (FLS split header fix)
+          if (h2 &amp;&amp; knownCol.test(h2)) return h2;
+          // Otherwise prefer row1 (standard format), fall back to row2
+          return h1 || h2;
+        });
+        const colMap = mapColumns(combinedHdrs);
+
+        if (colMap.FSN === undefined) { warnings.push(`&quot;${sheetName}&quot; in ${file.name}: FSN/Product ID column not found. Headers: ` + combinedHdrs.filter(Boolean).join(', ')); continue; }
+
+        // Clean values — strip &quot;(INR)&quot;, &quot;%&quot;, extra spaces from price/rate cells
+        const cleanVal = v => String(v || '').replace(/\(INR\)/gi,'').replace(/%/g,'').trim();
+
+        let sheetRows = 0;
+        for (let i = dataStart; i < aoa.length; i++) {
+          const row = aoa[i].map(v => String(v).trim());
+          const fsn = row[colMap.FSN] || '';
+          // Skip blank, too-short, non-alphanumeric, or pure-number cells (serial numbers like &quot;1.0&quot;)
+          if (!fsn || fsn.length < 5 || !/^[A-Za-z0-9]+$/.test(fsn) || /^\d+(\.\d+)?$/.test(fsn)) continue;
+          extractedData.push({
+            &quot;PO Number&quot;:        poNumber,
+            &quot;FSN&quot;:              fsn.toUpperCase(),
+            &quot;Title&quot;:            colMap.TITLE !== undefined ? row[colMap.TITLE] : '',
+            &quot;Quantity&quot;:         colMap.QTY !== undefined ? cleanVal(row[colMap.QTY]) : '',
+            &quot;Pending Quantity&quot;: colMap.PENDING_QTY !== undefined ? cleanVal(row[colMap.PENDING_QTY]) : '',
+            &quot;Supplier Price&quot;:   colMap.SUPPLIER_PRICE !== undefined ? cleanVal(row[colMap.SUPPLIER_PRICE]) : '',
+            &quot;Vertical&quot;:         colMap.VERTICAL !== undefined ? row[colMap.VERTICAL] : '',
+            &quot;Style Code&quot;:       colMap.STYLE_CODE !== undefined ? row[colMap.STYLE_CODE] : '',
+            &quot;Required by Date&quot;: colMap.REQUIRED_DATE !== undefined ? row[colMap.REQUIRED_DATE] : '',
+            &quot;IGST Rate&quot;:        colMap.IGST !== undefined ? cleanVal(row[colMap.IGST]) : '',
+            &quot;SGST/UTGST Rate&quot;:  colMap.SGST !== undefined ? cleanVal(row[colMap.SGST]) : '',
+            &quot;CGST Rate&quot;:        colMap.CGST !== undefined ? cleanVal(row[colMap.CGST]) : '',
+            &quot;Source File&quot;:      file.name
+          });
+          sheetRows++;
+        }
+        fileRows += sheetRows;
+      }
+      statuses[fi] = fileRows > 0 ? 'ok' : 'err';
+      if (fileRows === 0) warnings.push(`${file.name}: 0 rows extracted`);
+    } catch(e) { statuses[fi] = 'err'; warnings.push(`${file.name}: ${e.message}`); }
+    renderFileList(statuses);
+  }
+
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('progressLabel').textContent = 'Done!';
+  document.getElementById('extractBtn').disabled = false;
+
+  const sum = document.getElementById('resultSummary');
+  if (extractedData.length > 0) {
+    sum.className = 'result-band ok';
+    sum.innerHTML = `✅ Extracted <span>${extractedData.length} rows</span> from <span>${statuses.filter(s=>s==='ok').length} of ${selectedFiles.length} files</span>`;
+    renderPreview();
+    document.getElementById('nextToMapBtn').style.display = 'inline-flex';
+  } else {
+    sum.className = 'result-band warn';
+    sum.innerHTML = '⚠ No rows extracted. Check the warnings below.';
+  }
+
+  if (warnings.length) {
+    const w = document.getElementById('warnBox');
+    w.innerHTML = '<strong>Warnings:</strong><br>' + warnings.map(x => '· ' + x).join('<br>');
+    w.style.display = 'block';
+  }
+}
+
+function renderPreview() {
+  const cols = EXTRACT_COLS.filter(c => extractedData.some(r => r[c]));
+  const preview = extractedData.slice(0, 50);
+  document.getElementById('previewTable').innerHTML =
+    `<thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>` +
+    `<tbody>${preview.map(row => `<tr>${cols.map(c => `<td>${row[c]||''}</td>`).join('')}</tr>`).join('')}</tbody>`;
+  document.getElementById('previewWrap').style.display = 'block';
+}
+
+// ── STEP 4 — MAPPING ─────────────────────────────────────────
+const csvDZ = document.getElementById('csvDropZone');
+csvDZ.addEventListener('dragover', e => { e.preventDefault(); csvDZ.classList.add('over'); });
+csvDZ.addEventListener('dragleave', () => csvDZ.classList.remove('over'));
+csvDZ.addEventListener('drop', e => { e.preventDefault(); csvDZ.classList.remove('over'); handleCsvSelect(e.dataTransfer.files); });
+
+function handleCsvSelect(files) {
+  const file = Array.from(files).find(f => f.name.match(/\.csv$/i));
+  if (!file) { alert('Please upload a .csv file.'); return; }
+  const chip = document.getElementById('csvFileChip');
+  document.getElementById('csvFileName').textContent  = file.name;
+  document.getElementById('csvFileStatus').textContent = 'Ready';
+  chip.className = 'file-chip pending'; chip.style.display = 'flex';
+  document.getElementById('mapBtn').disabled = false;
+  document.getElementById('finalDownloadBtn').style.display = 'none';
+  document.getElementById('mapSummary').className = 'result-band';
+  document.getElementById('matchBreakdown').style.display = 'none';
+  document.getElementById('xlSection').style.display = 'none';
+  mappedData = [];
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      csvMapping = parseCsvMapping(e.target.result);
+      document.getElementById('csvFileStatus').textContent = csvMapping.size + ' POs loaded';
+      chip.className = 'file-chip ok';
+    } catch(err) {
+      document.getElementById('csvFileStatus').textContent = 'Parse error: ' + err.message;
+      chip.className = 'file-chip err';
+      document.getElementById('mapBtn').disabled = true;
+    }
+  };
+  reader.readAsText(file);
+}
+
+function parseCsvMapping(text) {
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l => l.trim());
+  if (lines.length < 2) throw new Error('CSV appears empty');
+  const headers = parseCsvRow(lines[0]).map(h => h.trim());
+  const poIdx   = headers.findIndex(h => h.toUpperCase() === 'PURCHASE ORDER ID');
+  const siteIdx = headers.findIndex(h => h.toUpperCase() === 'VENDOR SITE ID');
+  const whIdx   = headers.findIndex(h => h.toUpperCase() === 'ORIGIN WAREHOUSE');
+  const missing = [poIdx<0&amp;&amp;'&quot;Purchase Order ID&quot;',siteIdx<0&amp;&amp;'&quot;Vendor Site ID&quot;',whIdx<0&amp;&amp;'&quot;Origin Warehouse&quot;'].filter(Boolean);
+  if (missing.length) throw new Error('Columns not found: ' + missing.join(', '));
+  const map = new Map();
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const row = parseCsvRow(lines[i]);
+    const po  = (row[poIdx] || '').trim().toUpperCase();
+    if (!po) continue;
+    map.set(po, { vendorSiteId: (row[siteIdx]||'').trim(), originWarehouse: (row[whIdx]||'').trim() });
+  }
+  return map;
+}
+
+function parseCsvRow(line) {
+  const result = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '&quot;') { if (inQ &amp;&amp; line[i+1] === '&quot;') { cur += '&quot;'; i++; } else inQ = !inQ; }
+    else if (c === ',' &amp;&amp; !inQ) { result.push(cur); cur = ''; }
+    else cur += c;
+  }
+  result.push(cur); return result;
+}
+
+function runMapping() {
+  if (!extractedData.length) { alert('No extracted data. Complete Step 3 first.'); return; }
+  if (!csvMapping || !csvMapping.size) { alert('Mapping CSV not loaded or empty.'); return; }
+  mappedData = []; let matched = 0;
+  const unmatched = new Set();
+  for (const row of extractedData) {
+    const key = (row['PO Number'] || '').trim().toUpperCase();
+    const m   = csvMapping.get(key);
+    const nr  = Object.assign({}, row);
+    if (m) { nr['Vendor Site ID'] = m.vendorSiteId; nr['Origin Warehouse'] = m.originWarehouse; matched++; }
+    else { nr['Vendor Site ID'] = ''; nr['Origin Warehouse'] = ''; if (key) unmatched.add(key); }
+    // Apply WH Type from persistent mapping
+    nr['WH Type'] = getWhType(nr['Origin Warehouse']);
+    mappedData.push(nr);
+  }
+  const sum = document.getElementById('mapSummary');
+  sum.className = 'result-band ok';
+  sum.innerHTML = `✅ Mapping complete — <span>${mappedData.length} rows</span> ready`;
+  document.getElementById('matchedCount').textContent   = matched;
+  document.getElementById('unmatchedCount').textContent = unmatched.size;
+  document.getElementById('matchBreakdown').style.display = 'block';
+  if (unmatched.size) {
+    const ul = document.getElementById('unmatchedList');
+    ul.innerHTML = '<strong style=&quot;color:var(--yellow)&quot;>Unmatched POs:</strong><br>' + Array.from(unmatched).join('<br>');
+    ul.style.display = 'block';
+  }
+  renderFinalPreview();
+  renderWhSummary();
+  document.getElementById('finalDownloadBtn').style.display = 'inline-flex';
+  document.getElementById('csvFileChip').className = 'file-chip ok';
+  document.getElementById('xlSection').style.display = 'block';
+}
+
+function renderFinalPreview() {
+  const cols = FINAL_COLS.filter(c => mappedData.some(r => r[c]));
+  document.getElementById('finalPreviewTable').innerHTML =
+    `<thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>` +
+    `<tbody>${mappedData.slice(0,50).map(row => `<tr>${cols.map(c => `<td>${row[c]||''}</td>`).join('')}</tr>`).join('')}</tbody>`;
+  document.getElementById('finalPreviewWrap').style.display = 'block';
+}
+
+function downloadFinalExcel() {
+  if (!mappedData.length) return;
+  const cols  = FINAL_COLS.filter(c => mappedData.some(r => r[c]));
+  const ws    = XLSX.utils.aoa_to_sheet([cols, ...mappedData.map(r => cols.map(c => r[c]||''))]);
+  const widths = {&quot;PO Number&quot;:18,&quot;Vendor Site ID&quot;:16,&quot;Origin Warehouse&quot;:22,&quot;WH Type&quot;:16,&quot;FSN&quot;:16,&quot;Title&quot;:35,
+    &quot;Quantity&quot;:10,&quot;Pending Quantity&quot;:16,&quot;Supplier Price&quot;:14,&quot;Vertical&quot;:12,
+    &quot;Style Code&quot;:14,&quot;Required by Date&quot;:16,&quot;IGST Rate&quot;:10,&quot;SGST/UTGST Rate&quot;:14,&quot;CGST Rate&quot;:10,&quot;Source File&quot;:22};
+  ws['!cols'] = cols.map(c => ({wch: widths[c]||14}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Final Output');
+  XLSX.writeFile(wb, 'PO_Final_' + new Date().toISOString().slice(0,16).replace('T','_').replace(':','-') + '.xlsx');
+}
+
+// ── WH TYPE MAPPING ──────────────────────────────────────────
+const WH_MAP_KEY = 'fk_wh_mapping';
+let whMapping = {}; // { &quot;wh_code_lower&quot;: &quot;WH_Type&quot; }
+
+function loadWhMapping() {
+  try {
+    const stored = localStorage.getItem(WH_MAP_KEY);
+    if (stored) { whMapping = JSON.parse(stored); renderWhMappingUI(); }
+  } catch(e) {}
+}
+
+function saveWhMapping() {
+  localStorage.setItem(WH_MAP_KEY, JSON.stringify(whMapping));
+}
+
+function getWhType(originWarehouse) {
+  if (!originWarehouse) return '';
+  const key = originWarehouse.trim().toLowerCase();
+  return whMapping[key] || '';
+}
+
+function clearWhMapping() {
+  if (!confirm('Clear the saved WH Type mapping?')) return;
+  whMapping = {};
+  localStorage.removeItem(WH_MAP_KEY);
+  renderWhMappingUI();
+  document.getElementById('whMapStatus').className = 'wh-map-status';
+}
+
+function renderWhMappingUI() {
+  const count  = Object.keys(whMapping).length;
+  const badge  = document.getElementById('whMapBadge');
+  const card   = document.getElementById('whMapCard');
+  const clear  = document.getElementById('whMapClearBtn');
+  const prevWrap = document.getElementById('whPreviewWrap');
+  const prevTbl  = document.getElementById('whPreviewTable');
+
+  if (count > 0) {
+    badge.textContent = count + ' warehouses mapped';
+    badge.classList.add('show');
+    card.classList.add('loaded');
+    clear.style.display = 'inline-flex';
+
+    // Preview table
+    const entries = Object.entries(whMapping).slice(0, 8);
+    prevTbl.innerHTML =
+      `<thead><tr><th>WH Code</th><th>WH Type</th></tr></thead>` +
+      `<tbody>${entries.map(([k,v]) =>
+        `<tr><td>${k}</td><td><strong>${v}</strong></td></tr>`
+      ).join('')}${count > 8 ? `<tr><td colspan=&quot;2&quot; style=&quot;color:var(--text3);font-style:italic;&quot;>...and ${count-8} more</td></tr>` : ''}</tbody>`;
+    prevWrap.style.display = 'block';
+  } else {
+    badge.classList.remove('show');
+    card.classList.remove('loaded');
+    clear.style.display = 'none';
+    prevWrap.style.display = 'none';
+  }
+}
+
+async function handleWhMappingFile(files) {
+  const file = files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('whMapStatus');
+  statusEl.className = 'wh-map-status';
+  statusEl.textContent = '⏳ Parsing…';
+  statusEl.style.display = 'block';
+
+  try {
+    const isExcel = file.name.match(/\.(xlsx|xls)$/i);
+    let rows = [];
+
+    if (isExcel) {
+      const buf = await new Promise((res,rej) => {
+        const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('Read failed')); r.readAsArrayBuffer(file);
+      });
+      const wb  = XLSX.read(buf, { type: 'array' });
+      const ws  = wb.Sheets[wb.SheetNames[0]];
+      rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+    } else {
+      const text = await new Promise((res,rej) => {
+        const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('Read failed')); r.readAsText(file);
+      });
+      rows = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n')
+        .filter(l => l.trim())
+        .map(l => l.split(',').map(c => c.trim().replace(/^&quot;|&quot;$/g,'')));
+    }
+
+    if (rows.length < 2) throw new Error('File appears empty');
+    const headers = rows[0].map(h => String(h).trim().toUpperCase());
+    const codeIdx = headers.findIndex(h => h === 'WH_CODE' || h === 'WH CODE' || h === 'WHCODE');
+    const typeIdx = headers.findIndex(h => h === 'WH_TYPE' || h === 'WH TYPE' || h === 'WHTYPE');
+    if (codeIdx === -1) throw new Error('Column &quot;WH_Code&quot; not found. Headers detected: ' + rows[0].join(', '));
+    if (typeIdx === -1) throw new Error('Column &quot;WH_type&quot; not found. Headers detected: ' + rows[0].join(', '));
+
+    const newMap = {};
+    for (let i = 1; i < rows.length; i++) {
+      const code = String(rows[i][codeIdx] || '').trim().toLowerCase();
+      const type = String(rows[i][typeIdx] || '').trim();
+      if (code &amp;&amp; type) newMap[code] = type;
+    }
+
+    const count = Object.keys(newMap).length;
+    if (count === 0) throw new Error('No valid rows found. Check WH_Code and WH_type columns have data.');
+    whMapping = newMap;
+    saveWhMapping();
+    renderWhMappingUI();
+    statusEl.className = 'wh-map-status ok';
+    statusEl.textContent = `✅ ${count} warehouse codes loaded and saved from &quot;${file.name}&quot;`;
+  } catch(e) {
+    statusEl.className = 'wh-map-status err';
+    statusEl.textContent = '❌ ' + e.message;
+  }
+
+  // Reset file input so same file can be re-uploaded
+  document.getElementById('whMappingInput').value = '';
+}
+
+// ── WH SUMMARY ───────────────────────────────────────────────
+function renderWhSummary() {
+  if (!mappedData.length) return;
+
+  // Group by WH Type
+  const groups = {};
+  for (const row of mappedData) {
+    const type = row['WH Type'] || 'Unmapped';
+    if (!groups[type]) groups[type] = { pos: new Set(), qty: 0 };
+    groups[type].pos.add(row['PO Number'] || '');
+    groups[type].qty += parseFloat(String(row['Quantity'] || '0').replace(/[^0-9.]/g,'')) || 0;
+  }
+
+  // Colour class per type (fuzzy match)
+  function chipClass(type) {
+    const t = type.toLowerCase();
+    if (t.includes('minute')) return 'minutes';
+    if (t.includes('sourcing') || t.includes('hub')) return 'sourcing';
+    if (t.includes('deep') || t.includes('fc')) return 'deepfc';
+    return 'other';
+  }
+
+  const grid = document.getElementById('whSummaryGrid');
+  grid.innerHTML = Object.entries(groups)
+    .sort(([a],[b]) => a.localeCompare(b))
+    .map(([type, data]) => `
+      <div class=&quot;wh-chip ${chipClass(type)}&quot;>
+        <div class=&quot;wh-chip-type&quot;>${type}</div>
+        <div class=&quot;wh-chip-metrics&quot;>
+          <div class=&quot;wh-metric&quot;>
+            <span class=&quot;wh-metric-label&quot;>POs</span>
+            <span class=&quot;wh-metric-val&quot;>${data.pos.size}</span>
+          </div>
+          <div class=&quot;wh-metric&quot;>
+            <span class=&quot;wh-metric-label&quot;>Units</span>
+            <span class=&quot;wh-metric-val&quot;>${data.qty.toLocaleString('en-IN')}</span>
+          </div>
+        </div>
+      </div>`
+    ).join('');
+
+  document.getElementById('whSummary').style.display = 'block';
+}
+
+// ── EXCEL ONLINE ─────────────────────────────────────────────
+const XL_KEY = 'fk_xl_settings', XL_HIST = 'fk_xl_push_history';
+const SHEET_HEADERS = ['Date','PO Number','Vendor Site ID','Origin Warehouse','WH Type','FSN','Title',
+  'Quantity','Pending Quantity','Supplier Price','Vertical','Style Code',
+  'Required by Date','IGST Rate','SGST/UTGST Rate','CGST Rate','Source File'];
+let msalInstance = null, msalAccount = null, msalInitPromise = null;
+
+function saveXlSettings() {
+  const at = document.querySelector('input[name=&quot;xlAccountType&quot;]:checked');
+  localStorage.setItem(XL_KEY, JSON.stringify({
+    clientId: document.getElementById('xlClientId').value.trim(),
+    fileUrl:  document.getElementById('xlFileUrl').value.trim(),
+    accountType: at ? at.value : 'common'
+  }));
+}
+
+function loadXlSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem(XL_KEY) || '{}');
+    if (s.clientId) document.getElementById('xlClientId').value = s.clientId;
+    if (s.fileUrl)  document.getElementById('xlFileUrl').value  = s.fileUrl;
+    if (s.accountType) { const r = document.querySelector('input[name=&quot;xlAccountType&quot;][value=&quot;'+s.accountType+'&quot;]'); if(r) r.checked = true; }
+    if (s.clientId) initMsal(s.clientId, s.accountType || 'common');
+  } catch(e) {}
+}
+
+function getAccountType() {
+  const r = document.querySelector('input[name=&quot;xlAccountType&quot;]:checked'); return r ? r.value : 'common';
+}
+
+function initMsal(clientId, accountType) {
+  if (!clientId || typeof msal === 'undefined') return;
+  const authority = 'https://login.microsoftonline.com/' + (accountType || 'common');
+  try {
+    msalInstance = new msal.PublicClientApplication({ auth: { clientId, authority, redirectUri: 'http://localhost' }, cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true } });
+    msalInitPromise = msalInstance.initialize().then(() => { const a = msalInstance.getAllAccounts(); if(a.length) { msalAccount = a[0]; updateSignInBadge(); } }).catch(e => console.warn('MSAL init:', e.message));
+  } catch(e) { msalInstance = null; }
+}
+
+async function ensureMsalReady(clientId) {
+  if (typeof msal === 'undefined') throw new Error('Microsoft login library did not load. Check your internet connection and reload.');
+  if (!msalInstance) initMsal(clientId, getAccountType());
+  if (!msalInstance) throw new Error('MSAL could not start — verify your Client ID is correct (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)');
+  if (msalInitPromise) await msalInitPromise;
+}
+
+function updateSignInBadge() {
+  const b = document.getElementById('xlSignedInBadge'), btn = document.getElementById('xlSignInBtn');
+  if (!b) return;
+  if (msalAccount) { b.textContent = '✓ ' + (msalAccount.name || msalAccount.username || 'Signed in'); b.classList.add('show'); if(btn) btn.textContent = '🔄 Switch account'; }
+  else { b.classList.remove('show'); if(btn) btn.textContent = '🔑 Sign in with Microsoft'; }
+}
+
+async function signInMicrosoft() {
+  const clientId = document.getElementById('xlClientId').value.trim();
+  if (!clientId) { setXlStatus('err','⚠ Enter your Azure App Client ID first.'); return; }
+  msalInstance = null; msalInitPromise = null; msalAccount = null;
+  initMsal(clientId, getAccountType());
+  try {
+    await ensureMsalReady(clientId);
+    const r = await msalInstance.loginPopup({ scopes: ['Files.ReadWrite','User.Read'] });
+    msalAccount = r.account; updateSignInBadge();
+    setXlStatus('ok','✅ Signed in as ' + (msalAccount.name || msalAccount.username));
+  } catch(e) { setXlStatus('err','❌ Sign-in failed: ' + e.message); }
+}
+
+async function getGraphToken() {
+  await ensureMsalReady(document.getElementById('xlClientId').value.trim());
+  try { return (await msalInstance.acquireTokenSilent({ scopes: ['Files.ReadWrite'], account: msalAccount })).accessToken; }
+  catch(e) { return (await msalInstance.acquireTokenPopup({ scopes: ['Files.ReadWrite'] })).accessToken; }
+}
+
+function setXlStatus(type, msg) { const el = document.getElementById('xlStatus'); el.className = 'xl-status ' + type; el.textContent = msg; }
+
+function todayLabel() { const d = new Date(); return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear(); }
+
+function colLetter(n) { let r = ''; while(n > 0) { r = String.fromCharCode(65 + (n-1)%26) + r; n = Math.floor((n-1)/26); } return r; }
+
+function addXlHistory(date, rows) {
+  const h = JSON.parse(localStorage.getItem(XL_HIST) || '[]');
+  h.unshift({date, rows, ts: Date.now()}); if(h.length>20) h.pop();
+  localStorage.setItem(XL_HIST, JSON.stringify(h)); renderXlHistory();
+}
+
+function renderXlHistory() {
+  const h = JSON.parse(localStorage.getItem(XL_HIST) || '[]');
+  if (!h.length) return;
+  document.getElementById('xlHistory').style.display = 'block';
+  document.getElementById('xlHistoryList').innerHTML = h.map(e =>
+    `<div class=&quot;xl-hist-row&quot;><span class=&quot;xd&quot;>${e.date}</span><span>✓ ${e.rows} rows pushed</span></div>`
+  ).join('');
+}
+
+async function pushToExcel() {
+  if (!mappedData.length) { alert('No mapped data. Complete Step 4 mapping first.'); return; }
+  const clientId = document.getElementById('xlClientId').value.trim();
+  const fileUrl  = document.getElementById('xlFileUrl').value.trim();
+  if (!clientId) { setXlStatus('err','⚠ Enter your Azure App Client ID.'); return; }
+  if (!fileUrl)  { setXlStatus('err','⚠ Enter your OneDrive Excel file URL.'); return; }
+  const btn = document.getElementById('xlPushBtn');
+  btn.disabled = true;
+  setXlStatus('sending','⏳ Connecting to Excel…');
+  try {
+    await ensureMsalReady(clientId);
+    if (!msalAccount) { await signInMicrosoft(); if (!msalAccount) return; }
+    const token   = await getGraphToken();
+    const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+    const encoded = btoa(fileUrl).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+    const itemRes = await fetch('https://graph.microsoft.com/v1.0/shares/u!' + encoded + '/driveItem', { headers });
+    if (!itemRes.ok) throw new Error('Cannot access Excel file. Verify the OneDrive URL and permissions.');
+    const item = await itemRes.json();
+    const base = 'https://graph.microsoft.com/v1.0/drives/' + item.parentReference.driveId + '/items/' + item.id;
+    setXlStatus('sending','⏳ Preparing &quot;PO Tracker&quot; sheet…');
+    const wsRes = await fetch(base + '/workbook/worksheets', { headers });
+    const wsData = await wsRes.json();
+    if (!wsData.value.find(s => s.name === 'PO Tracker')) {
+      await fetch(base + '/workbook/worksheets/add', { method: 'POST', headers, body: JSON.stringify({ name: 'PO Tracker' }) });
+    }
+    const sn = encodeURIComponent('PO Tracker');
+    const usedRes  = await fetch(base + '/workbook/worksheets/' + sn + '/usedRange(valuesOnly=true)', { headers });
+    const usedData = await usedRes.json();
+    const hasRows  = usedData &amp;&amp; usedData.rowCount > 0;
+    const date     = todayLabel();
+    const dataRows = mappedData.map(r => [date, ...FINAL_COLS.map(c => r[c] || '')]);
+    const allRows  = hasRows ? dataRows : [SHEET_HEADERS, ...dataRows];
+    const startRow = hasRows ? (usedData.rowCount + 1) : 1;
+    const address  = 'A' + startRow + ':' + colLetter(SHEET_HEADERS.length) + (startRow + allRows.length - 1);
+    setXlStatus('sending','⏳ Writing ' + dataRows.length + ' rows…');
+    const wr = await fetch(base + '/workbook/worksheets/' + sn + &quot;/range(address='&quot; + address + &quot;')&quot;, {
+      method: 'PATCH', headers, body: JSON.stringify({ values: allRows })
+    });
+    if (!wr.ok) { const e = await wr.json().catch(() => ({})); throw new Error(e.error?.message || 'Write failed (HTTP ' + wr.status + ')'); }
+    setXlStatus('ok','✅ ' + dataRows.length + ' rows added to &quot;PO Tracker&quot; for ' + date);
+    addXlHistory(date, dataRows.length);
+  } catch(e) { setXlStatus('err','❌ ' + e.message); }
+  finally { btn.disabled = false; }
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  loadXlSettings();
+  renderXlHistory();
+  loadWhMapping();
+  setTimeout(() => {
+    if (typeof msal === 'undefined') {
+      const el = document.getElementById('xlStatus');
+      if (el) { el.className = 'xl-status err'; el.textContent = '⚠ Microsoft login library failed to load. Check internet connection and reload.'; }
+    }
+  }, 2500);
+});
+</script>
+</body>
+</html>
+"></iframe></div>
+  <div id="slotWrap" class="view"><iframe id="ifSlot" class="tool" title="PO Slotting" srcdoc="<!DOCTYPE html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;/>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;/>
+<title>Boldfit · PO Slotting Command</title>
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;>
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin>
+<link href=&quot;https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
+<script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js&quot;></script>
+<style>
+:root{
+  --bg:#0b0e15; --panel:#141a25; --panel2:#0f1520; --line:#232c3b; --line2:#33405490;
+  --txt:#eef2f8; --muted:#8a94a8; --soft:#aeb7c7;
+  --accent:#ffd23f; --accentd:#caa400;
+  --ftl:#5b94ff; --courier:#2fe6a4; --club:#ffb13e; --cannot:#ff5d72;
+  --cyan:#37d6e6; --magenta:#ff5da6; --violet:#9b7bff; --lime:#9be15d;
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:&quot;Hanken Grotesk&quot;,sans-serif;color:var(--txt);background:var(--bg);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+#bg{position:fixed;inset:0;z-index:-2;background:var(--bg)}
+#bg .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.42;mix-blend-mode:screen;animation:float 22s ease-in-out infinite}
+.b1{width:520px;height:520px;background:#2f6bff;top:-160px;left:-120px;animation-delay:0s}
+.b2{width:460px;height:460px;background:#ff4f9d;top:-100px;right:-120px;animation-delay:-6s}
+.b3{width:480px;height:480px;background:#16d6b0;bottom:-200px;left:20%;animation-delay:-12s}
+.b4{width:380px;height:380px;background:#ffc23a;bottom:-160px;right:8%;animation-delay:-3s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(60px,40px) scale(1.08)}66%{transform:translate(-40px,30px) scale(.95)}}
+#grain{position:fixed;inset:0;z-index:-1;opacity:.05;pointer-events:none;
+  background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)}
+.wrap{max-width:1280px;margin:0 auto;padding:0 22px 90px}
+header.top{margin-top:22px;border-radius:var(--radius);padding:22px 28px;display:flex;align-items:center;justify-content:space-between;gap:18px;
+  background:linear-gradient(120deg,#171f30,#1d1733 55%,#2a1430);border:1px solid var(--line2);position:relative;overflow:hidden;
+  box-shadow:0 20px 50px -24px rgba(0,0,0,.8)}
+header.top:before{content:&quot;&quot;;position:absolute;inset:0;background:
+  radial-gradient(600px 200px at 100% 0,rgba(255,210,63,.20),transparent 60%),
+  radial-gradient(500px 200px at 0 100%,rgba(91,148,255,.18),transparent 60%)}
+.brand{display:flex;align-items:center;gap:15px;position:relative}
+.mark{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-family:&quot;Bricolage Grotesque&quot;;font-weight:800;color:#0b0e15;font-size:24px;
+  background:conic-gradient(from 200deg,var(--accent),#ffe98a,var(--accent));transform:rotate(-5deg);box-shadow:0 8px 22px -6px rgba(255,210,63,.6)}
+.brand h1{font-family:&quot;Bricolage Grotesque&quot;;font-weight:800;font-size:23px;margin:0;letter-spacing:-.015em;
+  background:linear-gradient(90deg,#fff,#cdd6e6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand .sub{font-size:13px;color:#a7b0c4;margin-top:3px}
+.topmeta{font-family:&quot;JetBrains Mono&quot;;font-size:11.5px;color:#aeb7c7;text-align:right;line-height:1.7;position:relative}
+.topmeta b{color:var(--accent)}
+section.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px 24px;margin-top:20px;box-shadow:0 18px 44px -28px rgba(0,0,0,.7);animation:rise .5s both}
+section.panel:nth-child(2){animation-delay:.05s} section.panel:nth-child(3){animation-delay:.1s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.panel h2{font-family:&quot;Bricolage Grotesque&quot;;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#cdd6e6;margin:0 0 16px;display:flex;align-items:center;gap:10px}
+.panel h2 .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(255,210,63,.16)}
+.row{display:flex;gap:13px;flex-wrap:wrap;align-items:center}
+.maprow{justify-content:space-between}
+.pill{font-family:&quot;JetBrains Mono&quot;;font-size:11.5px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#0e141e;color:var(--soft);display:inline-flex;align-items:center;gap:8px}
+.led{width:9px;height:9px;border-radius:50%}
+.led.live{background:var(--courier);box-shadow:0 0 0 4px rgba(47,230,164,.18);animation:pulse 2s infinite}
+.led.fallback{background:var(--club);box-shadow:0 0 0 4px rgba(255,177,62,.16)}
+.led.err{background:var(--cannot);box-shadow:0 0 0 4px rgba(255,93,114,.18)}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(47,230,164,0)}}
+input.sheet{font-family:&quot;JetBrains Mono&quot;;font-size:12px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#0c121b;min-width:330px;color:var(--txt)}
+input.sheet:focus{outline:none;border-color:var(--accent)}
+button{font-family:&quot;Hanken Grotesk&quot;;font-weight:700;font-size:13.5px;border:1px solid transparent;background:var(--accent);color:#0b0e15;padding:10px 18px;border-radius:11px;cursor:pointer;transition:transform .14s,box-shadow .14s,background .14s}
+button:hover{transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(255,210,63,.6)}
+button:active{transform:translateY(0)}
+button.ghost{background:#0e141e;color:var(--txt);border-color:var(--line)}
+button.ghost:hover{background:#131b27;box-shadow:none;border-color:var(--line2)}
+.tabs{display:inline-flex;background:#0c121b;border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px;margin-bottom:16px}
+.tab{font-weight:700;font-size:13px;padding:8px 18px;border-radius:9px;cursor:pointer;color:var(--muted);transition:.18s;border:none;background:transparent}
+.tab.active{background:linear-gradient(120deg,var(--accent),#ffe07a);color:#0b0e15;box-shadow:0 6px 16px -8px rgba(255,210,63,.7)}
+.tab:hover:not(.active){color:var(--txt)}
+textarea{width:100%;min-height:160px;font-family:&quot;JetBrains Mono&quot;;font-size:12.5px;line-height:1.55;padding:15px;border:1px solid var(--line);border-radius:13px;background:#0c121b;resize:vertical;color:var(--soft)}
+textarea:focus{outline:none;border-color:var(--accent)}
+.drop{border:2px dashed var(--line2);border-radius:16px;padding:40px 24px;text-align:center;cursor:pointer;transition:.2s;background:radial-gradient(400px 120px at 50% 0,rgba(91,148,255,.08),transparent)}
+.drop:hover,.drop.over{border-color:var(--accent);background:radial-gradient(500px 160px at 50% 0,rgba(255,210,63,.12),transparent);transform:translateY(-2px)}
+.drop .ic{font-family:&quot;Bricolage Grotesque&quot;;font-weight:800;font-size:34px;color:var(--accent);margin-bottom:6px}
+.drop .big{font-size:16px;font-weight:700} .drop .small{font-size:12.5px;color:var(--muted);margin-top:6px}
+.filebar{display:none;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap;padding:12px 14px;background:#0c121b;border:1px solid var(--line);border-radius:12px}
+.filebar.show{display:flex}
+.filebar .fn{font-family:&quot;JetBrains Mono&quot;;font-size:12.5px;color:var(--txt)}
+.filebar select{font-family:&quot;JetBrains Mono&quot;;font-size:12px;padding:6px 9px;border-radius:8px;background:#0e141e;color:var(--txt);border:1px solid var(--line)}
+.hint{font-size:12px;color:var(--muted);margin:10px 2px 0;line-height:1.65}
+.hint code{font-family:&quot;JetBrains Mono&quot;;background:#0c121b;border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-size:11px;color:var(--soft)}
+.counter{font-family:&quot;JetBrains Mono&quot;;font-size:12px;color:var(--accent);margin-top:10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:13px}
+.kpi{background:#0d131d;border:1px solid var(--line);border-radius:15px;padding:15px 16px;position:relative;overflow:hidden;transition:transform .16s,border-color .16s;animation:pop .45s both}
+.kpi:hover{transform:translateY(-3px);border-color:var(--line2)}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.kpi .lab{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:7px}
+.kpi .lab .sw{width:9px;height:9px;border-radius:3px}
+.kpi .val{font-family:&quot;Bricolage Grotesque&quot;;font-weight:800;font-size:32px;margin-top:8px;line-height:1}
+.kpi:after{content:&quot;&quot;;position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;opacity:.16;filter:blur(8px)}
+.kpi.ftl:after{background:var(--ftl)} .kpi.courier:after{background:var(--courier)} .kpi.club:after{background:var(--club)} .kpi.cannot:after{background:var(--cannot)}
+.kpi.ftl .val{color:var(--ftl)} .kpi.courier .val{color:var(--courier)} .kpi.club .val{color:var(--club)} .kpi.cannot .val{color:var(--cannot)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:15px;background:#0c121b}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th{font-family:&quot;Bricolage Grotesque&quot;;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:10px;color:var(--muted);text-align:left;padding:12px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;background:#0e141e;z-index:1}
+td{padding:11px 12px;border-bottom:1px solid #18202d;vertical-align:top}
+td.mono,th.mono{font-family:&quot;JetBrains Mono&quot;}
+.num{font-family:&quot;JetBrains Mono&quot;;text-align:right}
+tbody tr.po{animation:rowin .4s both}
+@keyframes rowin{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+tr.grp{cursor:pointer;user-select:none}
+tr.grp td{background:linear-gradient(90deg,#141d2b,#101722);font-family:&quot;JetBrains Mono&quot;;font-weight:700;color:#cdd6e6;border-bottom:1px solid var(--line)}
+tr.grp .arr{display:inline-block;transition:transform .2s;color:var(--accent);margin-right:8px}
+tr.grp.collapsed .arr{transform:rotate(-90deg)}
+.chip{font-family:&quot;JetBrains Mono&quot;;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;white-space:nowrap;display:inline-block;border:1px solid transparent}
+.chip.FTL{background:rgba(91,148,255,.16);color:var(--ftl);border-color:rgba(91,148,255,.4)}
+.chip.Courier{background:rgba(47,230,164,.14);color:var(--courier);border-color:rgba(47,230,164,.4)}
+.chip.ClubFTL,.chip.ClubCourier{background:rgba(255,177,62,.15);color:var(--club);border-color:rgba(255,177,62,.4)}
+.chip.Cannot{background:rgba(255,93,114,.15);color:var(--cannot);border-color:rgba(255,93,114,.45)}
+.note{font-size:11px;color:var(--muted)}
+tr.po.risk td{background:rgba(255,93,114,.07)}
+td.expred{color:var(--cannot);font-weight:700}
+.warn{background:linear-gradient(120deg,rgba(255,177,62,.10),rgba(255,93,114,.08));border:1px solid rgba(255,177,62,.35);border-radius:13px;padding:13px 15px;margin-top:14px;font-size:12.5px;color:#ffd9a0}
+.warn ul{margin:8px 0 0;padding-left:18px} .warn li{margin:3px 0}
+.empty{padding:46px;text-align:center;color:var(--muted);font-size:13.5px}
+.foot{margin-top:28px;font-size:11.5px;color:var(--muted);text-align:center;line-height:1.7;font-family:&quot;JetBrains Mono&quot;}
+@media(max-width:640px){input.sheet{min-width:100%}.topmeta{display:none}}
+</style>
+</head>
+<body>
+<div id=&quot;bg&quot;><div class=&quot;blob b1&quot;></div><div class=&quot;blob b2&quot;></div><div class=&quot;blob b3&quot;></div><div class=&quot;blob b4&quot;></div></div>
+<div id=&quot;grain&quot;></div>
+
+<div class=&quot;wrap&quot;>
+<header class=&quot;top&quot;>
+  <div class=&quot;brand&quot;>
+    <div class=&quot;mark&quot;>B</div>
+    <div><h1>PO Slotting Command</h1><div class=&quot;sub&quot;>Flipkart appointment &amp;amp; mode planner · Boldfit Supply Ops</div></div>
+  </div>
+  <div class=&quot;topmeta&quot; id=&quot;topmeta&quot;>Loading mapping…</div>
+</header>
+
+<section class=&quot;panel&quot;>
+  <h2><span class=&quot;dot&quot;></span>Mapping source</h2>
+  <div class=&quot;row maprow&quot;>
+    <div class=&quot;row&quot;>
+      <span class=&quot;pill&quot; id=&quot;mapstatus&quot;><span class=&quot;led fallback&quot;></span>Built-in defaults</span>
+      <input class=&quot;sheet&quot; id=&quot;sheetId&quot; value=&quot;1chXXvmJDYmgsgK30-wc0RKOnBeFkOMKXc9dRblF-nus&quot; spellcheck=&quot;false&quot;/>
+      <button class=&quot;ghost&quot; id=&quot;reloadMap&quot;>Reload from sheet</button>
+    </div>
+    <div id=&quot;paramline&quot; style=&quot;font-family:'JetBrains Mono';font-size:11px;color:var(--muted)&quot;></div>
+  </div>
+  <div class=&quot;hint&quot;>Edit thresholds, lead times, zones, FCs, case packs and VSIDs in the Google Sheet, then hit <b>Reload</b>. Sheet must stay shared “Anyone with the link – Viewer”. If unreachable, built-in defaults keep the tool working.</div>
+</section>
+
+<section class=&quot;panel&quot;>
+  <h2><span class=&quot;dot&quot;></span>Upload PO data</h2>
+  <div class=&quot;drop&quot; id=&quot;drop&quot;>
+    <div class=&quot;ic&quot;>⬆</div>
+    <div class=&quot;big&quot;>Drop your .xlsx / .xls / .csv here</div>
+    <div class=&quot;small&quot;>or click to browse — the first sheet is read automatically</div>
+    <input type=&quot;file&quot; id=&quot;fileInput&quot; accept=&quot;.xlsx,.xls,.csv&quot; style=&quot;display:none&quot;/>
+  </div>
+  <div class=&quot;filebar&quot; id=&quot;filebar&quot;>
+    <span class=&quot;fn&quot; id=&quot;fileName&quot;></span>
+    <label class=&quot;note&quot; id=&quot;sheetPickWrap&quot; style=&quot;display:none&quot;>Sheet:&amp;nbsp;<select id=&quot;sheetPick&quot;></select></label>
+  </div>
+  <div class=&quot;counter&quot; id=&quot;counter&quot;></div>
+  <div class=&quot;hint&quot;>New here? <b>Download the template</b> — it has the correct headers and a date-formatted <code>Expiry_Date</code> column (dd-mmm-yyyy) so dates are read without ambiguity. <code>Source</code> accepts BLR/HR/MH or a VSID. <code>FSN</code>/<code>Boxes</code> are optional.</div>
+  <div class=&quot;row&quot; style=&quot;margin-top:16px&quot;>
+    <button class=&quot;accent&quot; id=&quot;run&quot;>⚡ Run slotting</button>
+    <button class=&quot;ghost&quot; id=&quot;template&quot;>⬇ Download template</button>
+    <button class=&quot;ghost&quot; id=&quot;sample&quot;>Load sample</button>
+    <button class=&quot;ghost&quot; id=&quot;clear&quot;>Clear</button>
+    <button class=&quot;ghost&quot; id=&quot;export&quot; style=&quot;margin-left:auto&quot;>⬇ Export to Excel</button>
+  </div>
+</section>
+
+<section class=&quot;panel&quot; id=&quot;resultsPanel&quot; style=&quot;display:none&quot;>
+  <h2><span class=&quot;dot&quot;></span>Summary</h2>
+  <div class=&quot;cards&quot; id=&quot;cards&quot;></div>
+  <div id=&quot;warnings&quot;></div>
+  <h2 style=&quot;margin-top:24px&quot;><span class=&quot;dot&quot;></span>Slotting plan <span class=&quot;note&quot; style=&quot;font-weight:400;text-transform:none;letter-spacing:0&quot;>— click a group row to collapse</span></h2>
+  <div class=&quot;tablewrap&quot;><table id=&quot;results&quot;><thead></thead><tbody></tbody></table></div>
+</section>
+
+<div class=&quot;foot&quot; id=&quot;foot&quot;></div>
+</div>
+
+<script>/* ===== Boldfit PO Slotting Engine ===== */
+(function (root) {
+  &quot;use strict&quot;;
+
+  // ---- Built-in fallback mapping (used if the Google Sheet can't be read) ----
+  const LT = {
+    Ahmedabad:[8,8,6], Ballabhgarh:[10,5,7], Bangalore:[4,8,8], Binola:[8,4,8],
+    Chennai:[5,8,8], Delhi:[8,4,8], Guwahati:[10,8,10], Hyderabad:[6,8,6],
+    Jaipur:[8,6,8], Kolkata:[10,8,10], Ludhiana:[10,6,8], Mumbai:[7,8,4],
+    Patna:[10,8,10], Sonipat:[10,5,8], &quot;Bhubaneswar (Mendehasala)&quot;:[10,5,7],
+    &quot;Saidham Grocery&quot;:[7,8,4], Bangalore_rkv:[4,8,8], ChennaiXD:[5,8,8]
+  };
+  const INTRA = new Set([&quot;BLR|Bangalore&quot;,&quot;BLR|Bangalore_rkv&quot;,&quot;MH|Mumbai&quot;]);
+  function buildLeadZone() {
+    const o = {}; const S = [&quot;BLR&quot;,&quot;HR&quot;,&quot;MH&quot;];
+    for (const dest in LT) S.forEach((s,i)=>{
+      const k = s+&quot;|&quot;+dest;
+      o[k] = { lead: LT[dest][i], zone: INTRA.has(k) ? &quot;Intra&quot; : &quot;Inter&quot; };
+    });
+    return o;
+  }
+  const DEFAULTS = {
+    leadZone: buildLeadZone(),
+    fcMaster: {
+      pat_sh_wh_nl_01nl:&quot;Patna&quot;, new_new_wh_nl_01nl:&quot;Delhi&quot;, ane_gsh_wh_nl_01nl:&quot;Bangalore_rkv&quot;,
+      ahm_sh_wh_nl_02nl:&quot;Ahmedabad&quot;, bal_gsh_wh_nl_01nl:&quot;Ballabhgarh&quot;, ben_hos_wh_nl_02nl:&quot;Bangalore&quot;,
+      bhu_men_wh_g_01:&quot;Bhubaneswar (Mendehasala)&quot;, bhi_pad_wh_nl_05nl:&quot;Mumbai&quot;, bin_sh_wh_nl_01nl:&quot;Binola&quot;,
+      guw_gsh_wh_nl_01nl:&quot;Guwahati&quot;, hyd_gsh_wh_nl_01nl:&quot;Hyderabad&quot;, jai_sh_wh_nl_01nl:&quot;Jaipur&quot;,
+      kol_gsh_wh_nl_01nl:&quot;Kolkata&quot;, son_gsh_wh_nl_01nl:&quot;Sonipat&quot;, sai_gsh_wh_nl_01nl:&quot;Saidham Grocery&quot;,
+      che_gsh_wh_nl_01nl:&quot;ChennaiXD&quot;, ulu_sh_wh_nl_01nl:&quot;Kolkata&quot;
+    },
+    vsidMap: { VS56581:&quot;HR&quot;, VS53418:&quot;BLR&quot;, VS58832:&quot;BLR&quot;, VS56592:&quot;MH&quot; },
+    casePack: {},
+    params: {
+      courierMin: 30000,
+      ftlIntraUnits: 1800, ftlIntraBoxes: 60,
+      ftlInterUnits: 2500, ftlInterBoxes: 150,
+      ftlTolerancePct: 5,
+      ftlTriggerLogic: &quot;Units OR Boxes&quot;,
+      clubMinPOs: 2,
+      slotOffsetDays: 1,
+      excludeSundays: true
+    }
+  };
+
+  const MODE = { FTL:&quot;FTL&quot;, COURIER:&quot;Courier&quot;, CLUB_FTL:&quot;Club \u2192 FTL&quot;, CLUB_COURIER:&quot;Club \u2192 Courier&quot;, CANNOT:&quot;Cannot Supply&quot; };
+
+  function num(v){ if(v===null||v===undefined||v===&quot;&quot;) return null; const n=Number(String(v).replace(/[, ]/g,&quot;&quot;)); return isNaN(n)?null:n; }
+
+  function resolveSource(raw, vsidMap){
+    const s=(raw||&quot;&quot;).trim();
+    if([&quot;BLR&quot;,&quot;HR&quot;,&quot;MH&quot;].includes(s.toUpperCase())) return {src:s.toUpperCase(), ok:true};
+    if(vsidMap[s]) return {src:vsidMap[s], ok:true, viaVsid:s};
+    if(vsidMap[s.toUpperCase()]) return {src:vsidMap[s.toUpperCase()], ok:true, viaVsid:s};
+    return {src:s, ok:false};
+  }
+
+  function parseExpiry(v){
+    if(v instanceof Date) return isNaN(v)?null:v;
+    if(v===null||v===undefined) return null;
+    v=String(v).trim(); if(!v) return null;
+    if(/^\d+(\.\d+)?$/.test(v)){ const n=+v; if(n>20000&amp;&amp;n<80000) return new Date(Math.round((n-25569)*86400000)); }
+    let m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+    if(m){ let y=+m[3]; if(y<100)y+=2000; let a=+m[1],b=+m[2];
+      if(a>12&amp;&amp;b<=12) return new Date(y,b-1,a);          // dd/mm/yyyy
+      if(b>12&amp;&amp;a<=12) return new Date(y,a-1,b);          // mm/dd/yyyy
+      return new Date(y,b-1,a); }                         // assume dd/mm/yyyy
+    const d=new Date(v); return isNaN(d)?null:d;
+  }
+
+  function addDays(d,n){ const x=new Date(d.getTime()); x.setDate(x.getDate()+n); return x; }
+  const DOW=[&quot;Sunday&quot;,&quot;Monday&quot;,&quot;Tuesday&quot;,&quot;Wednesday&quot;,&quot;Thursday&quot;,&quot;Friday&quot;,&quot;Saturday&quot;];
+  const MON=[&quot;Jan&quot;,&quot;Feb&quot;,&quot;Mar&quot;,&quot;Apr&quot;,&quot;May&quot;,&quot;Jun&quot;,&quot;Jul&quot;,&quot;Aug&quot;,&quot;Sep&quot;,&quot;Oct&quot;,&quot;Nov&quot;,&quot;Dec&quot;];
+  function fmt(d){ return d.getDate()+&quot; &quot;+MON[d.getMonth()]+&quot; &quot;+d.getFullYear(); }
+
+  function slotDate(lead, hasExpiry, today, P){
+    let d = addDays(today, (P.slotOffsetDays||0) + lead);
+    let note = &quot;&quot;;
+    if(P.excludeSundays &amp;&amp; d.getDay()===0){
+      if(hasExpiry){ d = addDays(d,1); note=&quot;Sunday \u2192 moved to Monday&quot;; }
+      else { note=&quot;Lands on Sunday \u2014 request PO extension&quot;; }
+    }
+    return { date:d, day:DOW[d.getDay()], text:fmt(d), note };
+  }
+
+  function computeBoxes(po, casePack){
+    const fsn=(po.fsn||&quot;&quot;).trim();
+    if(fsn &amp;&amp; casePack[fsn]){ const cs=num(casePack[fsn]); if(cs>0) return {boxes:Math.ceil(num(po.qty)/cs), src:&quot;casepack&quot;}; }
+    const b=num(po.boxes); if(b!==null) return {boxes:b, src:&quot;input&quot;};
+    return {boxes:null, src:&quot;none&quot;};
+  }
+
+  function run(rows, maps, today){
+    const M = Object.assign({}, DEFAULTS, maps||{});
+    const P = Object.assign({}, DEFAULTS.params, (maps&amp;&amp;maps.params)||{});
+    const leadZone=M.leadZone, fcMaster=M.fcMaster, vsidMap=M.vsidMap, casePack=M.casePack;
+    const tol = 1 - (num(P.ftlTolerancePct)||0)/100;
+    const warnings=[];
+
+    // enrich
+    const pos = rows.map((r,idx)=>{
+      const rs=resolveSource(r.source, vsidMap);
+      const fc=(r.fc||&quot;&quot;).trim();
+      const dest=fcMaster[fc]||null;
+      const lz=(dest&amp;&amp;leadZone[rs.src+&quot;|&quot;+dest])||null;
+      const bx=computeBoxes(r, casePack);
+      const po={
+        i:idx, poNumber:(r.poNumber||&quot;&quot;).trim(), fc, source:rs.src, sourceOk:rs.ok, viaVsid:rs.viaVsid,
+        dest, qty:num(r.qty)||0, value:num(r.value), boxes:bx.boxes, boxSrc:bx.src,
+        expiry:parseExpiry(r.expiry),
+        lead:lz?lz.lead:null, zone:lz?lz.zone:null,
+        notes:[], mode:null, clubId:null, slot:null
+      };
+      if(!rs.ok) po.notes.push(&quot;Unknown source/VSID&quot;);
+      po.expiryStr = po.expiry?fmt(po.expiry):&quot;&quot;;
+      if(String(r.expiry||&quot;&quot;).trim() &amp;&amp; !po.expiry) po.notes.push(&quot;Unreadable expiry date&quot;);
+      if(!dest) po.notes.push(&quot;FC not in FC_Master&quot;);
+      if(dest&amp;&amp;!lz) po.notes.push(&quot;No lead-time/zone for &quot;+rs.src+&quot;\u2192&quot;+dest);
+      if(po.value===null) po.notes.push(&quot;Missing PO value&quot;);
+      return po;
+    });
+
+    // group by source + FC
+    const groups={};
+    pos.forEach(po=>{ const k=po.source+&quot;||&quot;+po.fc; (groups[k]=groups[k]||[]).push(po); });
+
+    let clubSeq=0;
+    Object.values(groups).forEach(g=>{
+      const rep=g[0];
+      const zone=rep.zone||&quot;Inter&quot;; // default conservative
+      const floorU=(zone===&quot;Intra&quot;?P.ftlIntraUnits:P.ftlInterUnits)*tol;
+      const floorB=(zone===&quot;Intra&quot;?P.ftlIntraBoxes:P.ftlInterBoxes)*tol;
+      const hasExpiry=g.some(p=>p.expiry); 
+      const lead=rep.lead;
+      const slot=()=> lead!==null ? slotDate(lead,hasExpiry,today,P) : {text:&quot;\u2014&quot;,day:&quot;&quot;,note:&quot;No lead time&quot;};
+
+      function ftlTest(qty,boxes){
+        const uPass = qty>=floorU;
+        const bPass = boxes!==null &amp;&amp; boxes>=floorB;
+        return /OR/i.test(P.ftlTriggerLogic) ? (uPass||bPass) : (uPass&amp;&amp;bPass);
+      }
+
+      const sumQty=g.reduce((a,p)=>a+p.qty,0);
+      const allBoxKnown=g.every(p=>p.boxes!==null);
+      const sumBoxes=allBoxKnown?g.reduce((a,p)=>a+p.boxes,0):null;
+
+      if(ftlTest(sumQty,sumBoxes)){
+        const s=slot(); g.forEach(p=>{p.mode=MODE.FTL; p.slot=s;});
+        return;
+      }
+      // not FTL -> per-PO courier / clubbing
+      const cm=num(P.courierMin);
+      let candidates=g.filter(p=>p.value!==null &amp;&amp; p.value<cm);
+      let bigs=g.filter(p=>!(p.value!==null &amp;&amp; p.value<cm)); // >=cm or missing value
+      const s=slot();
+
+      let clubbed=[];
+      if(candidates.length>=(P.clubMinPOs||2)){
+        const combined=candidates.reduce((a,p)=>a+(p.value||0),0);
+        if(combined>=cm){
+          clubbed=candidates.slice();
+        } else if(bigs.filter(b=>b.value!==null).length>0){
+          const lift=bigs.filter(b=>b.value!==null).sort((a,b)=>a.value-b.value)[0];
+          clubbed=candidates.concat([lift]);
+          bigs=bigs.filter(b=>b!==lift);
+        } else {
+          candidates.forEach(p=>{p.mode=MODE.CANNOT; p.slot={text:&quot;\u2014&quot;,day:&quot;&quot;,note:&quot;Below \u20b930K, no PO to club with&quot;};});
+          candidates=[];
+        }
+      } else {
+        candidates.forEach(p=>{p.mode=MODE.CANNOT; p.slot={text:&quot;\u2014&quot;,day:&quot;&quot;,note:&quot;Below \u20b930K, no clubbing partner&quot;};});
+        candidates=[];
+      }
+
+      bigs.forEach(p=>{ p.mode=MODE.COURIER; p.slot=s; });
+
+      if(clubbed.length){
+        clubSeq++;
+        const cQty=clubbed.reduce((a,p)=>a+p.qty,0);
+        const cBoxKnown=clubbed.every(p=>p.boxes!==null);
+        const cBoxes=cBoxKnown?clubbed.reduce((a,p)=>a+p.boxes,0):null;
+        const m=ftlTest(cQty,cBoxes)?MODE.CLUB_FTL:MODE.CLUB_COURIER;
+        clubbed.forEach(p=>{p.mode=m; p.clubId=&quot;C&quot;+clubSeq; p.slot=s;});
+      }
+    });
+
+    // expiry risk: slotted POs vs slot date; Cannot Supply POs vs earliest possible ship date
+    pos.forEach(p=>{
+      p.expiryRisk=false;
+      if(!p.expiry) return;
+      let cmp=null, slotted=false;
+      if(p.mode &amp;&amp; p.mode!==MODE.CANNOT &amp;&amp; p.slot &amp;&amp; p.slot.date){ cmp=p.slot.date; slotted=true; }
+      else if(p.lead!==null){ cmp=addDays(today,(P.slotOffsetDays||0)+p.lead); }
+      if(cmp &amp;&amp; cmp>p.expiry){
+        p.expiryRisk=true;
+        p.notes.push(slotted
+          ? &quot;Slot &quot;+fmt(cmp)+&quot; is past expiry &quot;+fmt(p.expiry)+&quot; \u2014 request PO extension&quot;
+          : &quot;Earliest ship &quot;+fmt(cmp)+&quot; is past expiry &quot;+fmt(p.expiry)+&quot; \u2014 would need PO extension&quot;);
+      }
+    });
+
+    // summary
+    const sum={total:pos.length, units:pos.reduce((a,p)=>a+p.qty,0), byMode:{}, appts:0, expiryRisk:0};
+    sum.expiryRisk=pos.filter(p=>p.expiryRisk).length;
+    [MODE.FTL,MODE.COURIER,MODE.CLUB_FTL,MODE.CLUB_COURIER,MODE.CANNOT].forEach(m=>sum.byMode[m]=0);
+    pos.forEach(p=>{ if(p.mode) sum.byMode[p.mode]=(sum.byMode[p.mode]||0)+1; });
+    const appt=new Set(); pos.forEach(p=>{ if(p.mode&amp;&amp;p.mode!==MODE.CANNOT) appt.add(p.source+&quot;||&quot;+p.fc+&quot;||&quot;+(p.clubId||p.poNumber)); });
+    sum.appts=appt.size;
+
+    return { pos, summary:sum };
+  }
+
+  const API={ run, DEFAULTS, MODE, parseExpiry, resolveSource };
+  if(typeof module!==&quot;undefined&quot;&amp;&amp;module.exports) module.exports=API;
+  root.SlottingEngine=API;
+})(typeof window!==&quot;undefined&quot;?window:globalThis);
+</script>
+<script>
+const TABS={leadZone:&quot;LeadTime_Zone&quot;,fcMaster:&quot;FC_Master&quot;,casePack:&quot;Case_Pack&quot;,params:&quot;Parameters&quot;,vsidMap:&quot;VSID_Map&quot;};
+const E=window.SlottingEngine; let MAPS={}; let LAST=null;
+const state={fileWB:null, fileMatrix:null};
+const el=id=>document.getElementById(id);
+const gvizUrl=(id,tab)=>`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&amp;sheet=${encodeURIComponent(tab)}&amp;t=${Date.now()}`;
+
+function parseCSV(text){const rows=[];let row=[],cur=&quot;&quot;,q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){if(c==='&quot;'){if(text[i+1]==='&quot;'){cur+='&quot;';i++;}else q=false;}else cur+=c;}
+    else{if(c==='&quot;')q=true;else if(c===','){row.push(cur);cur=&quot;&quot;;}
+      else if(c==='\n'){row.push(cur);rows.push(row);row=[];cur=&quot;&quot;;}
+      else if(c==='\r'){}else cur+=c;}}
+  if(cur!==&quot;&quot;||row.length){row.push(cur);rows.push(row);}
+  return rows.filter(r=>r.some(x=>String(x).trim()!==&quot;&quot;));}
+function parsePaste(text){const delim=text.indexOf(&quot;\t&quot;)>=0?&quot;\t&quot;:&quot;,&quot;;
+  if(delim===&quot;,&quot;)return parseCSV(text);
+  return text.split(/\r?\n/).filter(l=>l.trim()!==&quot;&quot;).map(l=>l.split(&quot;\t&quot;));}
+const norm=s=>String(s||&quot;&quot;).toLowerCase().replace(/[^a-z0-9]/g,&quot;&quot;);
+function colIndex(header){const H=header.map(norm);const find=(...al)=>{for(const a of al){const i=H.indexOf(norm(a));if(i>=0)return i;}return -1;};
+  return{poNumber:find(&quot;po_number&quot;,&quot;po&quot;,&quot;ponumber&quot;,&quot;ponum&quot;),fc:find(&quot;fc_code&quot;,&quot;fc&quot;,&quot;fccode&quot;,&quot;originwarehouse&quot;,&quot;origin&quot;),
+    source:find(&quot;source&quot;,&quot;loc&quot;,&quot;location&quot;,&quot;vsid&quot;,&quot;boldfitlocation&quot;),fsn:find(&quot;fsn&quot;,&quot;sku&quot;),
+    qty:find(&quot;qty&quot;,&quot;quantity&quot;,&quot;units&quot;,&quot;sumofpendingquantity&quot;,&quot;pendingqty&quot;,&quot;sumpendingquantity&quot;),
+    value:find(&quot;po_value&quot;,&quot;value&quot;,&quot;povalue&quot;,&quot;valueorpo&quot;,&quot;amount&quot;),expiry:find(&quot;expiry_date&quot;,&quot;expiry&quot;,&quot;expirydate&quot;),
+    boxes:find(&quot;boxes&quot;,&quot;ofboxes&quot;,&quot;noofboxes&quot;,&quot;numberofboxes&quot;,&quot;box&quot;)};}
+function rowsFromMatrix(data){if(!data||!data.length)return[];
+  const ci=colIndex(data[0]);const hasHeader=ci.fc>=0||ci.poNumber>=0||ci.source>=0;
+  const start=hasHeader?1:0;const idx=hasHeader?ci:{poNumber:0,fc:1,source:2,fsn:3,qty:4,value:5,expiry:6,boxes:7};
+  const get=(r,k)=>idx[k]>=0&amp;&amp;r[idx[k]]!==undefined?r[idx[k]]:&quot;&quot;;
+  return data.slice(start).map(r=>({poNumber:get(r,&quot;poNumber&quot;),fc:get(r,&quot;fc&quot;),source:get(r,&quot;source&quot;),fsn:get(r,&quot;fsn&quot;),
+    qty:get(r,&quot;qty&quot;),value:get(r,&quot;value&quot;),expiry:get(r,&quot;expiry&quot;),boxes:get(r,&quot;boxes&quot;)}))
+    .filter(o=>String(o.fc).trim()||String(o.poNumber).trim());}
+function currentRows(){return rowsFromMatrix(state.fileMatrix);}
+function updateCounter(){const n=currentRows().length;el(&quot;counter&quot;).textContent=n?`${n} PO row(s) detected`:&quot;&quot;;}
+
+/* ---- mapping load (JSONP via gviz; avoids CORS, works from file:// and GitHub Pages) ---- */
+function fetchTab(id,tab){
+  return new Promise((resolve,reject)=>{
+    const cb=&quot;gv_&quot;+Math.random().toString(36).slice(2);
+    const s=document.createElement(&quot;script&quot;);let done=false;
+    function cleanup(){try{delete window[cb];}catch(e){window[cb]=undefined;}s.remove();}
+    window[cb]=resp=>{done=true;try{
+      if(!resp||!resp.table||resp.status===&quot;error&quot;){reject(new Error(&quot;gviz error&quot;));cleanup();return;}
+      const t=resp.table;const labels=t.cols.map(c=>String(c.label||c.id||&quot;&quot;));
+      const rows=t.rows.map(r=>r.c.map(cell=>cell&amp;&amp;cell.v!=null?cell.v:&quot;&quot;));
+      resolve([labels,...rows]);
+    }catch(e){reject(e);}cleanup();};
+    s.onerror=()=>{if(!done){reject(new Error(&quot;script error&quot;));cleanup();}};
+    s.src=`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=responseHandler:${cb}&amp;headers=1&amp;sheet=${encodeURIComponent(tab)}&amp;t=${Date.now()}`;
+    document.body.appendChild(s);
+    setTimeout(()=>{if(!done){reject(new Error(&quot;timeout&quot;));cleanup();}},9000);
+  });
+}
+const PMAP={courier_min_value:&quot;courierMin&quot;,ftl_intra_units_floor:&quot;ftlIntraUnits&quot;,ftl_intra_boxes_floor:&quot;ftlIntraBoxes&quot;,
+  ftl_inter_units_floor:&quot;ftlInterUnits&quot;,ftl_inter_boxes_floor:&quot;ftlInterBoxes&quot;,ftl_tolerance_pct:&quot;ftlTolerancePct&quot;,
+  ftl_trigger_logic:&quot;ftlTriggerLogic&quot;,clubbing_min_candidate_pos:&quot;clubMinPOs&quot;,slot_offset_days:&quot;slotOffsetDays&quot;,exclude_sundays:&quot;excludeSundays&quot;};
+async function loadMapping(){const id=el(&quot;sheetId&quot;).value.trim();const m={leadZone:{},fcMaster:{},casePack:{},vsidMap:{},params:{}};
+  let ok=0,err=0;async function t(n,fn){try{fn(await fetchTab(id,TABS[n]));ok++;}catch(e){err++;}}
+  await t(&quot;leadZone&quot;,d=>{const h=d[0].map(norm),si=h.indexOf(&quot;source&quot;),di=h.indexOf(&quot;destination&quot;),li=h.findIndex(x=>x.startsWith(&quot;leadtime&quot;)),zi=h.indexOf(&quot;zone&quot;);
+    d.slice(1).forEach(r=>{if(r[si])m.leadZone[r[si].trim()+&quot;|&quot;+r[di].trim()]={lead:Number(r[li]),zone:(r[zi]||&quot;Inter&quot;).trim()};});});
+  await t(&quot;fcMaster&quot;,d=>{const h=d[0].map(norm),fi=h.findIndex(x=>x.startsWith(&quot;fc&quot;)),di=h.indexOf(&quot;destination&quot;);
+    d.slice(1).forEach(r=>{if(r[fi])m.fcMaster[r[fi].trim()]=r[di].trim();});});
+  await t(&quot;casePack&quot;,d=>{const h=d[0].map(norm),fi=h.indexOf(&quot;fsn&quot;),ci=h.findIndex(x=>x.startsWith(&quot;case&quot;));
+    d.slice(1).forEach(r=>{if(r[fi])m.casePack[r[fi].trim()]=Number(r[ci]);});});
+  await t(&quot;vsidMap&quot;,d=>{const h=d[0].map(norm),vi=h.indexOf(&quot;vsid&quot;),si=h.findIndex(x=>x===&quot;source&quot;||x===&quot;loc&quot;);
+    d.slice(1).forEach(r=>{if(r[vi])m.vsidMap[r[vi].trim()]=r[si].trim();});});
+  await t(&quot;params&quot;,d=>{const h=d[0].map(norm),pi=h.indexOf(&quot;parameter&quot;),vi=h.indexOf(&quot;value&quot;);
+    d.slice(1).forEach(r=>{const k=PMAP[norm(r[pi])];if(!k)return;let v=r[vi];
+      if(k===&quot;excludeSundays&quot;)v=/true|yes|1/i.test(v);else if(k!==&quot;ftlTriggerLogic&quot;)v=Number(String(v).replace(/[, ]/g,&quot;&quot;));m.params[k]=v;});});
+  const live=ok>0&amp;&amp;Object.keys(m.fcMaster).length&amp;&amp;Object.keys(m.leadZone).length;
+  if(live){MAPS=m;setStatus(&quot;live&quot;,err);}else{MAPS={};setStatus(err?&quot;err&quot;:&quot;fallback&quot;);}
+  showParams();}
+function setStatus(kind,err){const s=el(&quot;mapstatus&quot;);
+  if(kind===&quot;live&quot;)s.innerHTML=`<span class=&quot;led live&quot;></span>Live from Google Sheet${err?` · ${err} tab defaulted`:&quot;&quot;}`;
+  else if(kind===&quot;err&quot;)s.innerHTML=`<span class=&quot;led err&quot;></span>Sheet unreachable · built-in defaults`;
+  else s.innerHTML=`<span class=&quot;led fallback&quot;></span>Built-in defaults`;}
+const eff=()=>Object.assign({},E.DEFAULTS.params,MAPS.params||{});
+function showParams(){const P=eff();
+  el(&quot;paramline&quot;).textContent=`FTL intra ${P.ftlIntraUnits}u/${P.ftlIntraBoxes}b · inter ${P.ftlInterUnits}u/${P.ftlInterBoxes}b · ±${P.ftlTolerancePct}% · courier ≥₹${P.courierMin} · club ≥${P.clubMinPOs}`;
+  el(&quot;topmeta&quot;).innerHTML=`<b>${new Date().toDateString()}</b><br>slot = today + ${P.slotOffsetDays} + lead`;}
+
+/* ---- count-up ---- */
+function countUp(node,target){const dur=600,t0=performance.now();const fmt=target>=10000;
+  function step(t){const k=Math.min(1,(t-t0)/dur);const v=Math.round(target*(1-Math.pow(1-k,3)));
+    node.textContent=fmt?v.toLocaleString(&quot;en-IN&quot;):v;if(k<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+
+const CC={&quot;FTL&quot;:&quot;FTL&quot;,&quot;Courier&quot;:&quot;Courier&quot;,&quot;Club → FTL&quot;:&quot;ClubFTL&quot;,&quot;Club → Courier&quot;:&quot;ClubCourier&quot;,&quot;Cannot Supply&quot;:&quot;Cannot&quot;};
+const SW={&quot;FTL&quot;:&quot;var(--ftl)&quot;,&quot;Courier&quot;:&quot;var(--courier)&quot;,&quot;Club → FTL&quot;:&quot;var(--club)&quot;,&quot;Club → Courier&quot;:&quot;var(--club)&quot;,&quot;Cannot Supply&quot;:&quot;var(--cannot)&quot;};
+function render(out){LAST=out;el(&quot;resultsPanel&quot;).style.display=&quot;block&quot;;const S=out.summary;
+  const cards=[[&quot;POs&quot;,S.total,&quot;&quot;],[&quot;Units&quot;,S.units,&quot;&quot;],[&quot;FTL&quot;,S.byMode[&quot;FTL&quot;],&quot;ftl&quot;],[&quot;Courier&quot;,S.byMode[&quot;Courier&quot;],&quot;courier&quot;],
+    [&quot;Clubbed&quot;,S.byMode[&quot;Club → FTL&quot;]+S.byMode[&quot;Club → Courier&quot;],&quot;club&quot;],[&quot;Cannot supply&quot;,S.byMode[&quot;Cannot Supply&quot;],&quot;cannot&quot;],[&quot;Expiry risk&quot;,S.expiryRisk||0,&quot;cannot&quot;],[&quot;Appointments&quot;,S.appts,&quot;&quot;]];
+  el(&quot;cards&quot;).innerHTML=cards.map(([l,v,c],i)=>`<div class=&quot;kpi ${c?c:''}&quot; style=&quot;animation-delay:${i*45}ms&quot;><div class=&quot;lab&quot;>${c?`<span class=&quot;sw&quot; style=&quot;background:${c==='ftl'?'var(--ftl)':c==='courier'?'var(--courier)':c==='club'?'var(--club)':'var(--cannot)'}&quot;></span>`:''}${l}</div><div class=&quot;val&quot; data-v=&quot;${v}&quot;>0</div></div>`).join(&quot;&quot;);
+  el(&quot;cards&quot;).querySelectorAll(&quot;.val&quot;).forEach(n=>countUp(n,+n.dataset.v));
+
+  const warns=[];out.pos.forEach(p=>p.notes.forEach(n=>{if(/Unknown source|not in FC_Master|No lead-time|past expiry|Unreadable expiry/.test(n))warns.push(`${p.poNumber||p.fc}: ${n}`);}));
+  el(&quot;warnings&quot;).innerHTML=warns.length?`<div class=&quot;warn&quot;><b>${warns.length} row(s) need attention</b><ul>${[...new Set(warns)].slice(0,12).map(w=>`<li>${w}</li>`).join(&quot;&quot;)}</ul></div>`:&quot;&quot;;
+
+  const groups={};out.pos.forEach(p=>{const k=p.source+&quot;||&quot;+p.fc;(groups[k]=groups[k]||[]).push(p);});
+  const head=[&quot;PO Number&quot;,&quot;FC Code&quot;,&quot;Qty&quot;,&quot;Boxes&quot;,&quot;Value (₹)&quot;,&quot;Lead&quot;,&quot;Zone&quot;,&quot;Mode&quot;,&quot;Club&quot;,&quot;Slot date&quot;,&quot;Day&quot;,&quot;Expiry&quot;,&quot;Notes&quot;];
+  el(&quot;results&quot;).querySelector(&quot;thead&quot;).innerHTML=&quot;<tr>&quot;+head.map((h,i)=>`<th class=&quot;${i>=2&amp;&amp;i<=4?'num':''}&quot;>${h}</th>`).join(&quot;&quot;)+&quot;</tr>&quot;;
+  let body=&quot;&quot;,gi=0,ri=0;
+  Object.keys(groups).sort().forEach(k=>{const g=groups[k],r0=g[0];gi++;
+    body+=`<tr class=&quot;grp&quot; data-g=&quot;${gi}&quot;><td colspan=&quot;13&quot;><span class=&quot;arr&quot;>▾</span>${r0.source} → ${r0.dest||&quot;?&quot;} <span class=&quot;note&quot; style=&quot;font-weight:400&quot;>(${r0.fc})</span> &amp;nbsp;·&amp;nbsp; ${g.length} PO · ${g.reduce((a,p)=>a+p.qty,0).toLocaleString(&quot;en-IN&quot;)} units · ${r0.zone||&quot;?&quot;}</td></tr>`;
+    g.forEach(p=>{const chip=p.mode?`<span class=&quot;chip ${CC[p.mode]}&quot;>${p.mode}</span>`:&quot;&quot;;
+      body+=`<tr class=&quot;po g${gi}${p.expiryRisk?' risk':''}&quot; style=&quot;animation-delay:${Math.min(ri*14,420)}ms&quot;>
+        <td class=&quot;mono&quot;>${p.poNumber||&quot;&quot;}</td><td class=&quot;mono note&quot;>${p.fc||&quot;&quot;}</td><td class=&quot;num&quot;>${p.qty}</td>
+        <td class=&quot;num&quot;>${p.boxes!==null?p.boxes:&quot;<span class='note'>—</span>&quot;}</td>
+        <td class=&quot;num&quot;>${p.value!==null?p.value.toLocaleString(&quot;en-IN&quot;):&quot;—&quot;}</td>
+        <td class=&quot;num&quot;>${p.lead!==null?p.lead:&quot;—&quot;}</td><td>${p.zone||&quot;—&quot;}</td>
+        <td>${chip}</td><td class=&quot;mono&quot;>${p.clubId||&quot;&quot;}</td>
+        <td class=&quot;mono&quot;>${p.slot?p.slot.text:&quot;—&quot;}</td><td>${p.slot?p.slot.day:&quot;&quot;}</td>
+        <td class=&quot;mono ${p.expiryRisk?'expred':''}&quot;>${p.expiryStr||&quot;—&quot;}</td>
+        <td class=&quot;note&quot;>${[p.slot&amp;&amp;p.slot.note,...p.notes].filter(Boolean).join(&quot;; &quot;)}</td></tr>`;ri++;});});
+  const tb=el(&quot;results&quot;).querySelector(&quot;tbody&quot;);tb.innerHTML=body;
+  tb.querySelectorAll(&quot;tr.grp&quot;).forEach(h=>h.onclick=()=>{h.classList.toggle(&quot;collapsed&quot;);
+    tb.querySelectorAll(&quot;tr.g&quot;+h.dataset.g).forEach(r=>r.style.display=h.classList.contains(&quot;collapsed&quot;)?&quot;none&quot;:&quot;&quot;);});
+  el(&quot;foot&quot;).textContent=`Generated ${new Date().toLocaleString()} · ${out.pos.length} POs · ${MAPS.params?&quot;live params&quot;:&quot;default params&quot;}`;
+  el(&quot;resultsPanel&quot;).scrollIntoView({behavior:&quot;smooth&quot;,block:&quot;start&quot;});}
+
+function runNow(){const rows=currentRows();
+  if(!rows.length){el(&quot;resultsPanel&quot;).style.display=&quot;block&quot;;el(&quot;cards&quot;).innerHTML=&quot;&quot;;el(&quot;warnings&quot;).innerHTML=&quot;&quot;;
+    el(&quot;results&quot;).querySelector(&quot;thead&quot;).innerHTML=&quot;&quot;;el(&quot;results&quot;).querySelector(&quot;tbody&quot;).innerHTML=&quot;&quot;;
+    el(&quot;warnings&quot;).innerHTML='<div class=&quot;empty&quot;>No rows detected. Paste data or upload a file with a header row, or click “Load sample”.</div>';return;}
+  render(E.run(rows,MAPS,new Date()));}
+function exportXLSX(){if(!LAST)return;
+  const head=[&quot;Source&quot;,&quot;Destination&quot;,&quot;FC_Code&quot;,&quot;PO_Number&quot;,&quot;Qty&quot;,&quot;Boxes&quot;,&quot;Value (Rs)&quot;,&quot;Lead&quot;,&quot;Zone&quot;,&quot;Mode&quot;,&quot;Club&quot;,&quot;Slot_Date&quot;,&quot;Day&quot;,&quot;Expiry&quot;,&quot;Notes&quot;];
+  const rows=[head];
+  LAST.pos.forEach(p=>rows.push([p.source,p.dest||&quot;&quot;,p.fc||&quot;&quot;,p.poNumber||&quot;&quot;,p.qty,
+    p.boxes!==null?p.boxes:&quot;&quot;,p.value!==null?p.value:&quot;&quot;,p.lead!==null?p.lead:&quot;&quot;,p.zone||&quot;&quot;,
+    p.mode||&quot;&quot;,p.clubId||&quot;&quot;,p.slot?p.slot.text:&quot;&quot;,p.slot?p.slot.day:&quot;&quot;,p.expiryStr||&quot;&quot;,
+    [p.slot&amp;&amp;p.slot.note,...p.notes].filter(Boolean).join(&quot;; &quot;)]));
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws[&quot;!cols&quot;]=[{wch:8},{wch:22},{wch:22},{wch:16},{wch:7},{wch:7},{wch:11},{wch:6},{wch:8},{wch:15},{wch:7},{wch:14},{wch:10},{wch:13},{wch:42}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,&quot;Slotting Plan&quot;);
+  XLSX.writeFile(wb,&quot;slotting_plan_&quot;+new Date().toISOString().slice(0,10)+&quot;.xlsx&quot;);}
+
+/* ---- file upload ---- */
+function readMatrixFromSheet(name){const ws=state.fileWB.Sheets[name];
+  state.fileMatrix=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:&quot;&quot;,cellDates:true});updateCounter();}
+function handleFile(file){const r=new FileReader();
+  r.onload=e=>{state.fileWB=XLSX.read(e.target.result,{type:&quot;array&quot;,cellDates:true});
+    el(&quot;fileName&quot;).textContent=&quot;📄 &quot;+file.name;el(&quot;filebar&quot;).classList.add(&quot;show&quot;);
+    const names=state.fileWB.SheetNames;const pick=el(&quot;sheetPick&quot;);
+    if(names.length>1){el(&quot;sheetPickWrap&quot;).style.display=&quot;&quot;;pick.innerHTML=names.map(n=>`<option>${n}</option>`).join(&quot;&quot;);
+      pick.onchange=()=>{readMatrixFromSheet(pick.value);if(currentRows().length)runNow();};}
+    else el(&quot;sheetPickWrap&quot;).style.display=&quot;none&quot;;
+    readMatrixFromSheet(names[0]);if(currentRows().length)runNow();};
+  r.readAsArrayBuffer(file);}
+
+const SAMPLE=`PO_Number\tFC_Code\tSource\tQty\tPO_Value\tExpiry_Date
+FBHWN08218164\tben_hos_wh_nl_02nl\tBLR\t50\t7450\t28/06/2026
+FBHWN08218238\tben_hos_wh_nl_02nl\tBLR\t500\t110330\t28/06/2026
+FBHWN08220372\tben_hos_wh_nl_02nl\tBLR\t348\t104713\t28/06/2026
+FBHWN08220404\tben_hos_wh_nl_02nl\tBLR\t200\t29794\t28/06/2026
+FLS240A73C74\tben_hos_wh_nl_02nl\tBLR\t550\t93015\t28/06/2026
+FLS54E3DD1AE\tben_hos_wh_nl_02nl\tBLR\t297\t60713\t28/06/2026
+FHGWN08179976\thyd_gsh_wh_nl_01nl\tVS53418\t450\t115900\t28/06/2026
+FHGWN08180326\thyd_gsh_wh_nl_01nl\tVS53418\t900\t117815\t28/06/2026
+FHGWN08218267\thyd_gsh_wh_nl_01nl\tVS53418\t350\t70062\t28/06/2026
+FLS219B02030\thyd_gsh_wh_nl_01nl\tVS53418\t320\t70574\t28/06/2026
+FLS000F2A31A\tpat_sh_wh_nl_01nl\tHR\t292\t53052\t28/06/2026
+FLS44D6C591A\tpat_sh_wh_nl_01nl\tHR\t90\t13061\t28/06/2026
+FLSCE4D29A27\tpat_sh_wh_nl_01nl\tHR\t90\t13061\t28/06/2026
+FLSE9E8EAF8D\tnew_new_wh_nl_01nl\tHR\t173\t38727\t28/06/2026
+FNNWN08162380\tnew_new_wh_nl_01nl\tHR\t100\t9999\t28/06/2026
+FNNWN08162538\tnew_new_wh_nl_01nl\tHR\t180\t35860\t28/06/2026
+FJSWN08218290\tjai_sh_wh_nl_01nl\tHR\t100\t14897\t28/06/2026
+FBGWN08218201\tbal_gsh_wh_nl_01nl\tHR\t100\t14897\t28/06/2026
+FBGWN08220318\tbal_gsh_wh_nl_01nl\tHR\t50\t16838\t28/06/2026`;
+
+/* ---- template download ---- */
+function downloadTemplate(){
+  const headers=[&quot;PO_Number&quot;,&quot;FC_Code&quot;,&quot;Source&quot;,&quot;FSN&quot;,&quot;Qty&quot;,&quot;PO_Value&quot;,&quot;Expiry_Date&quot;,&quot;Boxes&quot;];
+  const ex=[
+    [&quot;FBHWN08218238&quot;,&quot;ben_hos_wh_nl_02nl&quot;,&quot;BLR&quot;,&quot;&quot;,500,110330,new Date(2026,5,28),&quot;&quot;],
+    [&quot;FHGWN08218267&quot;,&quot;hyd_gsh_wh_nl_01nl&quot;,&quot;VS53418&quot;,&quot;&quot;,350,70062,new Date(2026,5,10),&quot;&quot;]
+  ];
+  const ws=XLSX.utils.aoa_to_sheet([headers,...ex],{cellDates:true});
+  for(let r=1;r<=ex.length;r++){const ref=XLSX.utils.encode_cell({r:r,c:6});if(ws[ref]){ws[ref].t=&quot;d&quot;;ws[ref].z=&quot;dd-mmm-yyyy&quot;;}}
+  ws[&quot;!cols&quot;]=[{wch:16},{wch:22},{wch:9},{wch:12},{wch:8},{wch:11},{wch:14},{wch:8}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,&quot;PO_Input&quot;);
+  XLSX.writeFile(wb,&quot;PO_Input_template.xlsx&quot;);
+}
+function loadSample(){
+  state.fileMatrix=parsePaste(SAMPLE);state.fileWB=null;
+  el(&quot;fileName&quot;).textContent=&quot;🧪 Sample data&quot;;el(&quot;filebar&quot;).classList.add(&quot;show&quot;);el(&quot;sheetPickWrap&quot;).style.display=&quot;none&quot;;
+  updateCounter();runNow();
+}
+
+/* ---- wire up ---- */
+el(&quot;run&quot;).onclick=runNow;
+el(&quot;template&quot;).onclick=downloadTemplate;
+el(&quot;sample&quot;).onclick=loadSample;
+el(&quot;clear&quot;).onclick=()=>{state.fileMatrix=null;state.fileWB=null;el(&quot;fileInput&quot;).value=&quot;&quot;;el(&quot;fileName&quot;).textContent=&quot;&quot;;el(&quot;filebar&quot;).classList.remove(&quot;show&quot;);el(&quot;sheetPickWrap&quot;).style.display=&quot;none&quot;;el(&quot;resultsPanel&quot;).style.display=&quot;none&quot;;updateCounter();};
+el(&quot;export&quot;).onclick=exportXLSX;
+el(&quot;reloadMap&quot;).onclick=async()=>{el(&quot;mapstatus&quot;).innerHTML='<span class=&quot;led fallback&quot;></span>Loading…';await loadMapping();if(currentRows().length)runNow();};
+const drop=el(&quot;drop&quot;),fi=el(&quot;fileInput&quot;);
+drop.onclick=()=>{fi.value=&quot;&quot;;fi.click();};
+fi.onchange=e=>{const f=e.target.files[0];if(f)handleFile(f);fi.value=&quot;&quot;;};
+[&quot;dragenter&quot;,&quot;dragover&quot;].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add(&quot;over&quot;);}));
+[&quot;dragleave&quot;,&quot;drop&quot;].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove(&quot;over&quot;);}));
+drop.addEventListener(&quot;drop&quot;,e=>{const f=e.dataTransfer.files[0];if(f)handleFile(f);});
+showParams();loadMapping();
+</script>
+</body>
+</html>
+"></iframe></div>
+</main>
+
+<script>
+const views={home:document.getElementById("home"),proc:document.getElementById("procWrap"),slot:document.getElementById("slotWrap")};
+const tabs=[...document.querySelectorAll(".tab")];
+const newtab=document.getElementById("newtab");
+let current="home";
+function show(v){
+  current=v;
+  for(const k in views) views[k].classList.toggle("active",k===v);
+  tabs.forEach(t=>t.classList.toggle("active",t.dataset.view===v));
+  newtab.style.display=(v==="proc"||v==="slot")?"inline-flex":"none";
+}
+tabs.forEach(t=>t.onclick=()=>show(t.dataset.view));
+document.querySelectorAll(".card").forEach(c=>c.onclick=()=>show(c.dataset.go));
+newtab.onclick=()=>{
+  const f=current==="proc"?document.getElementById("ifProc"):document.getElementById("ifSlot");
+  const blob=new Blob([f.srcdoc],{type:"text/html"});
+  window.open(URL.createObjectURL(blob),"_blank");
+};
+</script>
+</body>
+</html>
