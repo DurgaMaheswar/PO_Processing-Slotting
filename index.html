@@ -1771,6 +1771,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .kpi .lab{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:7px}
 .kpi .lab .sw{width:9px;height:9px;border-radius:3px}
 .kpi .val{font-family:&quot;Bricolage Grotesque&quot;;font-weight:800;font-size:32px;margin-top:8px;line-height:1}
+.kpi .kpisub{font-family:&quot;JetBrains Mono&quot;;font-size:11px;color:var(--muted);margin-top:6px;font-weight:500}
 .kpi:after{content:&quot;&quot;;position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;opacity:.16;filter:blur(8px)}
 .kpi.ftl:after{background:var(--ftl)} .kpi.courier:after{background:var(--courier)} .kpi.club:after{background:var(--club)} .kpi.cannot:after{background:var(--cannot)}
 .kpi.ftl .val{color:var(--ftl)} .kpi.courier .val{color:var(--courier)} .kpi.club .val{color:var(--club)} .kpi.cannot .val{color:var(--cannot)}
@@ -2070,6 +2071,9 @@ td.expred{color:var(--cannot);font-weight:700}
     pos.forEach(p=>{ if(p.mode) sum.byMode[p.mode]=(sum.byMode[p.mode]||0)+1; });
     const appt=new Set(); pos.forEach(p=>{ if(p.mode&amp;&amp;p.mode!==MODE.CANNOT) appt.add(p.source+&quot;||&quot;+p.fc+&quot;||&quot;+(p.clubId||p.poNumber)); });
     sum.appts=appt.size;
+    const ftlG=new Set(),clubG=new Set();
+    pos.forEach(p=>{ if(p.mode===MODE.FTL) ftlG.add(p.source+&quot;||&quot;+p.fc); if(p.clubId) clubG.add(p.clubId); });
+    sum.ships={FTL:ftlG.size, Courier:sum.byMode[MODE.COURIER], Club:clubG.size, Cannot:sum.byMode[MODE.CANNOT]};
 
     return { pos, summary:sum };
   }
@@ -2174,9 +2178,13 @@ function countUp(node,target){const dur=600,t0=performance.now();const fmt=targe
 const CC={&quot;FTL&quot;:&quot;FTL&quot;,&quot;Courier&quot;:&quot;Courier&quot;,&quot;Club → FTL&quot;:&quot;ClubFTL&quot;,&quot;Club → Courier&quot;:&quot;ClubCourier&quot;,&quot;Cannot Supply&quot;:&quot;Cannot&quot;};
 const SW={&quot;FTL&quot;:&quot;var(--ftl)&quot;,&quot;Courier&quot;:&quot;var(--courier)&quot;,&quot;Club → FTL&quot;:&quot;var(--club)&quot;,&quot;Club → Courier&quot;:&quot;var(--club)&quot;,&quot;Cannot Supply&quot;:&quot;var(--cannot)&quot;};
 function render(out){LAST=out;el(&quot;resultsPanel&quot;).style.display=&quot;block&quot;;const S=out.summary;
-  const cards=[[&quot;POs&quot;,S.total,&quot;&quot;],[&quot;Units&quot;,S.units,&quot;&quot;],[&quot;FTL&quot;,S.byMode[&quot;FTL&quot;],&quot;ftl&quot;],[&quot;Courier&quot;,S.byMode[&quot;Courier&quot;],&quot;courier&quot;],
-    [&quot;Clubbed&quot;,S.byMode[&quot;Club → FTL&quot;]+S.byMode[&quot;Club → Courier&quot;],&quot;club&quot;],[&quot;Cannot supply&quot;,S.byMode[&quot;Cannot Supply&quot;],&quot;cannot&quot;],[&quot;Expiry risk&quot;,S.expiryRisk||0,&quot;cannot&quot;],[&quot;Appointments&quot;,S.appts,&quot;&quot;]];
-  el(&quot;cards&quot;).innerHTML=cards.map(([l,v,c],i)=>`<div class=&quot;kpi ${c?c:''}&quot; style=&quot;animation-delay:${i*45}ms&quot;><div class=&quot;lab&quot;>${c?`<span class=&quot;sw&quot; style=&quot;background:${c==='ftl'?'var(--ftl)':c==='courier'?'var(--courier)':c==='club'?'var(--club)':'var(--cannot)'}&quot;></span>`:''}${l}</div><div class=&quot;val&quot; data-v=&quot;${v}&quot;>0</div></div>`).join(&quot;&quot;);
+  const cards=[[&quot;POs&quot;,S.total,&quot;&quot;,&quot;&quot;],[&quot;Units&quot;,S.units,&quot;&quot;,&quot;&quot;],
+    [&quot;FTL&quot;,S.ships.FTL,&quot;ftl&quot;,S.byMode[&quot;FTL&quot;]+&quot; POs&quot;],
+    [&quot;Courier&quot;,S.ships.Courier,&quot;courier&quot;,S.byMode[&quot;Courier&quot;]+&quot; POs&quot;],
+    [&quot;Clubbed&quot;,S.ships.Club,&quot;club&quot;,(S.byMode[&quot;Club → FTL&quot;]+S.byMode[&quot;Club → Courier&quot;])+&quot; POs&quot;],
+    [&quot;Cannot supply&quot;,S.byMode[&quot;Cannot Supply&quot;],&quot;cannot&quot;,S.byMode[&quot;Cannot Supply&quot;]+&quot; POs&quot;],
+    [&quot;Expiry risk&quot;,S.expiryRisk||0,&quot;cannot&quot;,&quot;&quot;],[&quot;Appointments&quot;,S.appts,&quot;&quot;,&quot;&quot;]];
+  el(&quot;cards&quot;).innerHTML=cards.map(([l,v,c,sub],i)=>`<div class=&quot;kpi ${c?c:''}&quot; style=&quot;animation-delay:${i*45}ms&quot;><div class=&quot;lab&quot;>${c?`<span class=&quot;sw&quot; style=&quot;background:${c==='ftl'?'var(--ftl)':c==='courier'?'var(--courier)':c==='club'?'var(--club)':'var(--cannot)'}&quot;></span>`:''}${l}</div><div class=&quot;val&quot; data-v=&quot;${v}&quot;>0</div>${sub?`<div class=&quot;kpisub&quot;>${sub}</div>`:&quot;&quot;}</div>`).join(&quot;&quot;);
   el(&quot;cards&quot;).querySelectorAll(&quot;.val&quot;).forEach(n=>countUp(n,+n.dataset.v));
 
   const warns=[];out.pos.forEach(p=>p.notes.forEach(n=>{if(/Unknown source|not in FC_Master|No lead-time|past expiry|Unreadable expiry/.test(n))warns.push(`${p.poNumber||p.fc}: ${n}`);}));
