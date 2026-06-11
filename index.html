@@ -898,11 +898,11 @@ tr:hover td{background:var(--blue-light);color:var(--text);}
 let selectedFiles = [], extractedData = [], mappedData = [], csvMapping = null;
 const TOTAL = 4;
 
-const EXTRACT_COLS = [&quot;PO Number&quot;,&quot;FSN&quot;,&quot;Title&quot;,&quot;Quantity&quot;,&quot;Pending Quantity&quot;,
+const EXTRACT_COLS = [&quot;PO Number&quot;,&quot;Order Date&quot;,&quot;Expiry Date&quot;,&quot;Nature of Transaction&quot;,&quot;Category&quot;,&quot;Bill From GSTIN&quot;,&quot;Bill To GSTIN&quot;,&quot;FSN&quot;,&quot;Title&quot;,&quot;Quantity&quot;,&quot;Pending Quantity&quot;,
   &quot;Supplier Price&quot;,&quot;Vertical&quot;,&quot;Style Code&quot;,&quot;Required by Date&quot;,
   &quot;IGST Rate&quot;,&quot;SGST/UTGST Rate&quot;,&quot;CGST Rate&quot;,&quot;Source File&quot;];
 
-const FINAL_COLS = [&quot;PO Number&quot;,&quot;Vendor Site ID&quot;,&quot;Origin Warehouse&quot;,&quot;WH Type&quot;,&quot;FSN&quot;,&quot;Title&quot;,
+const FINAL_COLS = [&quot;PO Number&quot;,&quot;Order Date&quot;,&quot;Expiry Date&quot;,&quot;Nature of Transaction&quot;,&quot;Category&quot;,&quot;Bill From GSTIN&quot;,&quot;Bill To GSTIN&quot;,&quot;Vendor Site ID&quot;,&quot;Origin Warehouse&quot;,&quot;WH Type&quot;,&quot;FSN&quot;,&quot;Title&quot;,
   &quot;Quantity&quot;,&quot;Pending Quantity&quot;,&quot;Supplier Price&quot;,&quot;Vertical&quot;,&quot;Style Code&quot;,
   &quot;Required by Date&quot;,&quot;IGST Rate&quot;,&quot;SGST/UTGST Rate&quot;,&quot;CGST Rate&quot;,&quot;Source File&quot;];
 
@@ -1172,6 +1172,26 @@ async function extractData() {
         // Clean values — strip &quot;(INR)&quot;, &quot;%&quot;, extra spaces from price/rate cells
         const cleanVal = v => String(v || '').replace(/\(INR\)/gi,'').replace(/%/g,'').trim();
 
+        // ── HEADER-BLOCK FIELDS (Order Date, Expiry, GSTIN, Category, Nature) ──
+        const hdrVal = (labelRe) => {
+          for (let r = 0; r < aoa.length; r++) {
+            const rr = (aoa[r] || []).map(v => String(v).trim());
+            for (let c = 0; c < rr.length; c++) {
+              if (labelRe.test(rr[c])) {
+                for (let k = c + 1; k < rr.length; k++) { if (rr[k] !== '') return rr[k]; }
+              }
+            }
+          }
+          return '';
+        };
+        const hdr = {
+          &quot;Order Date&quot;:            hdrVal(/^order\s*(created\s*)?date$/i),
+          &quot;Expiry Date&quot;:           hdrVal(/^expiry\s*date$/i),
+          &quot;Nature of Transaction&quot;: hdrVal(/^nature\s+of\s+transaction$/i),
+          &quot;Category&quot;:              hdrVal(/^category$/i),
+          &quot;Bill From GSTIN&quot;:       hdrVal(/^b\w*\s*from\s*gstin$/i),
+          &quot;Bill To GSTIN&quot;:         hdrVal(/^b\w*\s*to\s*gstin$/i),
+        };
         let sheetRows = 0;
         for (let i = dataStart; i < aoa.length; i++) {
           const row = aoa[i].map(v => String(v).trim());
@@ -1180,6 +1200,7 @@ async function extractData() {
           if (!fsn || fsn.length < 5 || !/^[A-Za-z0-9]+$/.test(fsn) || /^\d+(\.\d+)?$/.test(fsn)) continue;
           extractedData.push({
             &quot;PO Number&quot;:        poNumber,
+            ...hdr,
             &quot;FSN&quot;:              fsn.toUpperCase(),
             &quot;Title&quot;:            colMap.TITLE !== undefined ? row[colMap.TITLE] : '',
             &quot;Quantity&quot;:         colMap.QTY !== undefined ? cleanVal(row[colMap.QTY]) : '',
@@ -1344,7 +1365,7 @@ function downloadFinalExcel() {
   if (!mappedData.length) return;
   const cols  = FINAL_COLS.filter(c => mappedData.some(r => r[c]));
   const ws    = XLSX.utils.aoa_to_sheet([cols, ...mappedData.map(r => cols.map(c => r[c]||''))]);
-  const widths = {&quot;PO Number&quot;:18,&quot;Vendor Site ID&quot;:16,&quot;Origin Warehouse&quot;:22,&quot;WH Type&quot;:16,&quot;FSN&quot;:16,&quot;Title&quot;:35,
+  const widths = {&quot;PO Number&quot;:18,&quot;Order Date&quot;:13,&quot;Expiry Date&quot;:13,&quot;Nature of Transaction&quot;:18,&quot;Category&quot;:18,&quot;Bill From GSTIN&quot;:18,&quot;Bill To GSTIN&quot;:18,&quot;Vendor Site ID&quot;:16,&quot;Origin Warehouse&quot;:22,&quot;WH Type&quot;:16,&quot;FSN&quot;:16,&quot;Title&quot;:35,
     &quot;Quantity&quot;:10,&quot;Pending Quantity&quot;:16,&quot;Supplier Price&quot;:14,&quot;Vertical&quot;:12,
     &quot;Style Code&quot;:14,&quot;Required by Date&quot;:16,&quot;IGST Rate&quot;:10,&quot;SGST/UTGST Rate&quot;:14,&quot;CGST Rate&quot;:10,&quot;Source File&quot;:22};
   ws['!cols'] = cols.map(c => ({wch: widths[c]||14}));
@@ -1668,7 +1689,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </body>
 </html>
 "></iframe></div>
-    <div id="slotWrap" class="view"><iframe id="ifSlot" class="tool" title="PO Slotting" srcdoc="<!DOCTYPE html>
+    <div id="slotWrap" class="view"><iframe id="ifSlot" class="tool" title="Minutes Slotting" srcdoc="<!DOCTYPE html>
 <html lang=&quot;en&quot;>
 <head>
 <meta charset=&quot;UTF-8&quot;/>
